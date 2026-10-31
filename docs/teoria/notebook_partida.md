@@ -25,7 +25,7 @@
 | **Ej. 1:** evaluar con **series nuevas** de la misma función, **promediando** sobre varias | celda 22 | `evaluate()` · D-0.1 |
 | **Ej. 2:** analizar la solución de cada mercado, compararla con el **aleatorio** y con **buy & hold**, y **razonar si la estrategia es la esperada** | celda 22 | **00** (baselines), **01**, **02**, informe |
 | **Ej. 3:** ajustar los hiperparámetros, "en particular" **α**, **ε** (probablemente con decaimiento), **γ** y **número de episodios** | celda 22 | **01**, **02** (`run_grid`) · D-2.1 para ε en A3C |
-| **Ej. 4:** **tabla** con algoritmos y baselines por mercado, con al menos **rendimiento** y **tiempo de convergencia** | celda 22 | **04** · D-0.3 (criterio abierto) |
+| **Ej. 4:** **tabla** con algoritmos y baselines por mercado, con al menos **rendimiento** y **tiempo de convergencia** | celda 22 | **04** · D-0.3 |
 | **Más allá de los mínimos** (cuenta en la rúbrica): otras funciones, serie real, otros algoritmos... | celdas 5, 22, 24 | **03** (§8) |
 | **PDF de 2 páginas como máximo:** pruebas realizadas, resultados y conclusiones | celda 23 | `results/informe.md` → `results/build_informe.py` · D-0.5 |
 | **Una entrega por grupo** de TFM | celda 23 | — |
@@ -230,7 +230,7 @@ El paso de compra ya cobra la variación del precio; el de venta, no.
 | $\lvert r\rvert$ máximo | 0,51 | ≈0,12 | **Recortar la recompensa a ±1 no hace nada** (trampa 8) |
 
 - "Recompensa ≈1e-3 por paso" (D-1.1) es el orden de la **señal** y de la comisión. El **ruido** es de 2e-2 a 1e-1, y hay que tenerlo en cuenta al elegir la escala.
-- Sin normalizar, la tendencia de los mercados 2-4 apenas mueve la entrada frente a la posición, y la red tenderá a ignorarla. No sirve normalizar con los límites de `observation_space` (±1), que no reflejan la escala real. Normalizar con estadísticos de train por mercado es la alternativa de D-1.1, que sigue abierta.
+- Sin normalizar, la tendencia de los mercados 2-4 apenas mueve la entrada frente a la posición, y la red tenderá a ignorarla. No sirve normalizar con los límites de `observation_space` (±1), que no reflejan la escala real. Normalizar con estadísticos de train por mercado es lo que decide D-1.1, ya cerrada (`train_scales`).
 - Las Q iniciales de una red sin entrenar pueden ser mayores que las diferencias entre acciones (≈1e-3). **La pérdida baja antes de que la política tenga sentido:** mirad la política, no solo la pérdida.
 - **Lo que no cambia:** la red recibe la misma información que la tabla. Gana resolución (umbral continuo, sin bins) y generalización, **pero no ve nada nuevo.** Donde el Taller 1 falló por falta de información (mercado 4), no hay razón para esperar una mejora.
 
@@ -383,12 +383,12 @@ Convergencia del duelo con la misma configuración (T1:D-2.5). Otros datos del T
 
 8. **Copiar recetas sin mirar la escala.** Recortar la recompensa a ±1 no hace nada aquí, porque $\lvert r\rvert$ nunca llega a 1 (§4.3). Lo mismo con Huber con δ = 1: se reduce a MSE. El *reward clipping* a signo, en cambio, destruye la magnitud.
 9. **Olvidar normalizar**, o normalizar con estadísticos de test o de todos los mercados a la vez. Si se normaliza, debe aplicarse igual en train, validación y test, y guardarse con el modelo (D-1.1).
-10. **Fiarse de la curva de recompensa.** Sube sola al bajar ε (§4.2, sutileza 4). Y con ε alto, el comportamiento no refleja lo aprendido (T30 ~04:41): **medid la política *greedy* en validación** (propuesta de D-0.3).
+10. **Fiarse de la curva de recompensa.** Sube sola al bajar ε (§4.2, sutileza 4). Y con ε alto, el comportamiento no refleja lo aprendido (T30 ~04:41): **medid la política *greedy* en validación** (D-0.3).
 11. **`convergence_episode` engaña.** No significa nada si el agente acaba sin operar (`common/protocol.py`; D-0.3). Con A3C, los episodios además corren en paralelo: comparad pasos de entorno y tiempo.
-12. **Un `terminated` mal tratado.** El último paso no es terminal de verdad (D-1.2). Afecta a 1 de 494 pasos en DQN, pero en A3C también al arranque del retorno de $n$ pasos: decidid una regla y usadla en los dos.
+12. **Un `terminated` mal tratado.** El último paso no es terminal de verdad, pero se trata como tal (D-1.2). Afecta a 1 de 494 pasos en DQN, y en A3C también al arranque del retorno de $n$ pasos: la regla es la misma en los dos.
 13. **Evaluar A3C solo en *greedy*.** Por las acciones redundantes (§4.2, sutileza 2), la política determinista puede diferir mucho de la estocástica aprendida. Comparad las dos antes de sacar conclusiones. En la tabla va la *greedy* (D-0.1), y conviene decir si la estocástica difiere.
 14. **Volver a ejecutar la celda que crea el modelo** y perder lo entrenado (T30 ~04:43). Guardad con `save` y usad la caché de `run_grid`.
-15. **Quedarse sin tiempo.** Con los costes de D-0.2 (una medición, vale la proporción), aprender en cada paso cuesta 494 × ≈3,6 ms ≈ 1,8 s por episodio: 500 episodios son ≈15 min y 4 mercados × 5 semillas son ≈5 h **en secuencia, para un solo algoritmo y sin barridos**. Evaluar 200 series añade ≈28 s por agente y mercado. Conviene aprender cada varios pasos o al final de la época (T30 ~03:33), aunque un único paso de gradiente por episodio es muy poco ([03_dqn.md](03_dqn.md) §13); lanzar barridos con `run_grid` y reservar el resultado final con tiempo. Y `tiempo_s` solo es comparable con `n_jobs=1`.
+15. **Quedarse sin tiempo.** Con lo medido en el equipo actual (notebook 00, §7), aprender en cada paso cuesta ≈0,34 s por episodio: 500 episodios son ≈3 min y 4 mercados × 5 semillas son ≈1 h **en secuencia, para un solo algoritmo y sin barridos**. Evaluar 200 series añade ≈10 s por agente y mercado. En otro equipo puede costar varias veces más. Conviene aprender cada varios pasos o al final de la época (T30 ~03:33), aunque un único paso de gradiente por episodio es muy poco ([03_dqn.md](03_dqn.md) §13); lanzar barridos con `run_grid` y reservar el resultado final con tiempo. Y `tiempo_s` solo es comparable con `n_jobs=1`.
 16. **Funciones en celdas con A3C.** En Windows, `spawn` no puede importar funciones de una celda; `worker` va en `common/a3c.py`, con `set_num_threads(1)` y `set_seed` por proceso (README; D-0.2). No se anidan procesos: `run_grid(..., n_jobs=1)`.
 17. **Usar GPU esperando ganar tiempo.** Con estas redes no compensa (T30 ~04:40; D-0.2).
 18. **Modificar `env.py` o los generadores.** Lo detecta `test_common.py` y rompe la comparación. Las variantes van en un entorno derivado.
@@ -436,7 +436,7 @@ Convergencia del duelo con la misma configuración (T1:D-2.5). Otros datos del T
 **Nota: propuesta de plan.** Todo lo anterior se reduce a estos pasos:
 
 1. **Hoy:** email del representante; quien asistiera el 31/10 contrasta §3.5 con lo que se dijo.
-2. **D-1.1 ya está cerrada; cerrar D-1.2 pronto**, porque afecta a todos los entrenamientos. Empezad con la observación normalizada por mercado y validad el código en el mercado 1: tiene la señal más fuerte (§5.2), y el resultado del Taller 1 (x502) dice qué esperar.
+2. **D-1.1 y D-1.2 ya están cerradas.** Empezad con la observación normalizada por mercado y validad el código en el mercado 1: tiene la señal más fuerte (§5.2), y el resultado del Taller 1 (x502) dice qué esperar.
 3. **DQN y A3C primero en mercados 1 y 3,** que son los que tienen señal. En 2 y 4 el resultado esperable es no operar o quedarse dentro: si el agente opera mucho, sospechad antes que celebrar.
 4. **Medir siempre la política *greedy* en validación,** con 494 decisiones por episodio, y comparar con `no_operar`, buy & hold y `results/taller1_tabular.csv`.
 5. **Enviar una versión temprana del informe** para probar que cabe en 2 páginas y dedicar el resto del tiempo al análisis: es lo que preguntarán en la discusión.
