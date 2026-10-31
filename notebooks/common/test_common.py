@@ -92,6 +92,11 @@ class TestProtocolo(unittest.TestCase):
         self.assertEqual([trend.act(o) for o in (up, flat, down)], [BUY, HOLD, SELL])
         self.assertEqual([reversion.act(o) for o in (up, flat, down)], [SELL, HOLD, BUY])
 
+    def test_escalas_de_train(self):
+        sigma_tendencia, sigma_retorno = protocol.train_scales("reversion_media")
+        self.assertAlmostEqual(sigma_tendencia, 0.024, places=3)
+        self.assertAlmostEqual(sigma_retorno, 0.020, places=3)
+
     def test_aleatorio_con_semilla(self):
         a, b = RandomAgent(seed=1), RandomAgent(seed=1)
         self.assertEqual([a.act(None) for _ in range(20)], [b.act(None) for _ in range(20)])

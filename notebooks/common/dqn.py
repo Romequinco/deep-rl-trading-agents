@@ -2,6 +2,7 @@
 
 Se implementa aquí y no en el notebook para poder lanzar barridos con `run_grid`.
 Los valores por defecto son los del notebook de clase `2-cart_pole_DQN`, solo como punto de partida.
+Observación y recompensa se escalan con `train_scales(mercado)` (D-1.1).
 """
 
 from dataclasses import dataclass

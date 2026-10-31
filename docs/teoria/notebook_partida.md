@@ -436,7 +436,7 @@ Convergencia del duelo con la misma configuración (T1:D-2.5). Otros datos del T
 **Nota: propuesta de plan.** Todo lo anterior se reduce a estos pasos:
 
 1. **Hoy:** email del representante; quien asistiera el 31/10 contrasta §3.5 con lo que se dijo.
-2. **Cerrar D-1.1 y D-1.2 pronto**, porque afectan a todos los entrenamientos. Empezad con la observación normalizada por mercado y validad el código en el mercado 1: tiene la señal más fuerte (§5.2), y el resultado del Taller 1 (x502) dice qué esperar.
+2. **D-1.1 ya está cerrada; cerrar D-1.2 pronto**, porque afecta a todos los entrenamientos. Empezad con la observación normalizada por mercado y validad el código en el mercado 1: tiene la señal más fuerte (§5.2), y el resultado del Taller 1 (x502) dice qué esperar.
 3. **DQN y A3C primero en mercados 1 y 3,** que son los que tienen señal. En 2 y 4 el resultado esperable es no operar o quedarse dentro: si el agente opera mucho, sospechad antes que celebrar.
 4. **Medir siempre la política *greedy* en validación,** con 494 decisiones por episodio, y comparar con `no_operar`, buy & hold y `results/taller1_tabular.csv`.
 5. **Enviar una versión temprana del informe** para probar que cabe en 2 páginas y dedicar el resto del tiempo al análisis: es lo que preguntarán en la discusión.

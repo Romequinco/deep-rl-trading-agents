@@ -5,6 +5,7 @@ importar funciones definidas en una celda de un notebook. Cada proceso debe llam
 `torch.set_num_threads(1)` y a `set_seed` con una semilla propia. Los valores por defecto de `gamma`,
 `lr` y `hidden` son los del notebook de clase `3-cart_pole_actor_critic`; `n_workers` deja un núcleo
 libre en un equipo de 4, y `t_max` y `entropy_coef` son solo un punto de partida.
+Observación y recompensa se escalan con `train_scales(mercado)` (D-1.1).
 """
 
 from dataclasses import dataclass

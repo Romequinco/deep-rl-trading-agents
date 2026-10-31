@@ -71,9 +71,21 @@ Formato ligero tipo ADR, como en el Taller 1. ID `D-X.n`: `X` es el bloque (0 ge
   (percentiles 5/95 ≈ ±0,23 en el mercado 1 y ≈ ±0,04 en el resto), y la recompensa es del orden de 1e-3 por paso.
 - **Alternativas:** normalizar la observación con estadísticos solo de train; escalar la recompensa; recortarla (clip),
   como propone la transparencia de mejoras de DQN.
+- **Decisión:** normalizar las dos cosas con constantes por mercado, calculadas solo con series de train
+  (`train_scales`): la red recibe `[tendencia / σ_tendencia, posición]` y aprende con `recompensa / σ_retorno`. Las
+  métricas se siguen midiendo con el balance real. Escalar la recompensa no cambia la estrategia óptima.
+- **Por qué constantes y no una ventana móvil:** las series salen de un generador estable, y al empezar el episodio una
+  ventana apenas tiene datos para estimar σ. Una σ de test o de la propia serie miraría el futuro. Con el S&P 500 (03),
+  cuya escala cambia con el tiempo, habría que reconsiderarlo.
 - **Evidencia (`00_entorno_y_baselines`, §3):** σ de la tendencia en train de 0,153 en el mercado 1 y ≈0,024 en el
   resto, y distribuciones parecidas tras dividir por ella. Ruido del retorno entre 19 y 106 veces la comisión.
-- **Estado:** ABIERTA
+- **Evidencia (prueba con un DQN mínimo, `results/00_grid_normalizacion.csv`):** 200 episodios, 3 semillas, validación.
+  Mediana en reversión a la media: sin nada 0 %, solo recompensa +1,9 %, solo observación +1,5 %, las dos +10,4 %. Solo
+  con la recompensa escalada la decisión de comprar depende de la tendencia (compra tras caídas). En el mercado 1 las
+  tres variantes con algún cambio se solapan (x576-x596), y en el browniano ninguna obtiene ganancia real.
+- **Límite:** con 3 semillas, "las dos" no queda demostrada frente a "solo recompensa", y ninguna alcanza a la regla de
+  referencia en reversión (+31,5 %). Hay que confirmarlo con el DQN definitivo, y probarlo en A3C.
+- **Estado:** CERRADA
 
 ### D-1.2 · Fin del episodio
 

@@ -41,6 +41,18 @@ def train_series_seed(seed, episode):
     return series_seed
 
 
+def train_scales(market, n_series=50):
+    """Escalas de `market` calculadas solo con series de train (D-1.1): (σ de la tendencia, σ del retorno).
+
+    La red recibe `[tendencia / σ_tendencia, posición]` y aprende con `recompensa / σ_retorno`.
+    """
+    prices = np.array([make_prices(market, N_STEPS, s) for s in range(n_series)])
+    windows = np.lib.stride_tricks.sliding_window_view(prices, 6, axis=1)
+    trends = (windows[..., -1] - windows.mean(axis=-1)) / windows.mean(axis=-1)
+    returns = np.diff(prices, axis=1) / prices[:, :-1]
+    return float(trends.std()), float(returns.std())
+
+
 def set_seed(seed):
     """Fija las semillas de random, NumPy y PyTorch. Llamar también dentro de cada proceso de A3C."""
     import torch
