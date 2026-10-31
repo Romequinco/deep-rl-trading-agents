@@ -1,0 +1,12 @@
+{
+  "series": "SP500",
+  "provider": "FRED / S&P Dow Jones Indices",
+  "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=SP500&cosd=2017-01-01&coed=2025-12-31",
+  "description_url": "https://fred.stlouisfed.org/series/SP500",
+  "retrieved_on": "2026-10-28",
+  "start": "2017-01-03",
+  "end": "2025-12-31",
+  "observations": 2262,
+  "sha256": "6196d8d326fd219002fc1dde039bdec02c6ad2a1dfd69adfd36e69c40bea3969",
+  "units": "Daily close price index; no dividends; not directly investable"
+}

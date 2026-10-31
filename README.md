@@ -1,2 +1,121 @@
-# deep-rl-trading-agents
-Deep reinforcement learning (DQN &amp; A3C) for single-asset trading on synthetic markets (trend + cycle, GBM, mean reversion, regime switching), benchmarked against random and buy &amp; hold baselines.
+# deep-rl-trading-agents · Agentes de Deep RL para trading
+
+Práctica en grupo del Máster MIAX (módulo de Aprendizaje por Refuerzo): **DQN y A3C** para invertir en un único
+activo sobre mercados sintéticos (tendencia + ciclo, browniano geométrico, reversión a la media y regímenes
+alcista/bajista), comparados con un agente aleatorio y con buy & hold.
+
+Continúa el Taller 1, con Q-Learning y SARSA tabulares:
+[rl-trading-agents](https://github.com/Romequinco/rl-trading-agents).
+
+**Grupo:** Óscar Romero Quincoces, Fernando Dapena Tauste y Daniel García López.
+
+## Enunciado (resumen)
+
+- **Entorno:** `SimpleTradingEnv` del taller. El estado es `(tendencia, posición)`, las acciones son
+  vender / mantener / comprar, la comisión es del 0,1 % y la recompensa es la variación del precio
+  con posición abierta menos los costes.
+- **Mínimos:**
+  1. DQN y A3C en los 4 mercados, con una serie nueva en cada episodio y evaluación promediada sobre series de test.
+  2. Comparación con el aleatorio y con buy & hold, razonando si la estrategia es la esperada.
+  3. Ajuste de α, ε (con decaimiento), γ y número de episodios.
+  4. Tabla comparativa de rendimiento y tiempo de convergencia.
+- **Entrega:** PDF de **2 páginas como máximo** (pruebas, resultados y conclusiones), una por grupo.
+  - Antes del **martes 3/11:** un representante manda un email al profesor para fijar el orden de presentación.
+  - Antes de la clase del **jueves 5/11:** primera versión por email.
+  - **5/11, en clase:** presentación y discusión de 15 minutos.
+  - **5/11, 23:59:** entrega final.
+- **Evaluación:** los mínimos dan el aprobado (50 %). El otro 50 % se reparte entre ir más allá de los
+  mínimos (10 %), la calidad de presentación (20 %), la justificación del diseño (10 %) y el análisis
+  crítico (10 %).
+
+## Estructura
+
+```
+├── notebooks/                    # todo el trabajo
+│   ├── 00_entorno_y_baselines.ipynb
+│   ├── 01_dqn.ipynb
+│   ├── 02_a3c.ipynb
+│   ├── 03_extras.ipynb
+│   ├── 04_comparativa.ipynb      # solo lee results/: tabla final y figuras
+│   └── common/                   # código común: única fuente de verdad
+│       ├── env.py                # SimpleTradingEnv (copia literal del enunciado)
+│       ├── markets.py            # 4 generadores, extras del Taller 1 y S&P 500
+│       ├── agents.py             # baselines: aleatorio, buy & hold, no operar
+│       ├── protocol.py           # series, evaluate(), métricas, save_results(), run_grid()
+│       ├── dqn.py  a3c.py        # agentes (interfaz por implementar)
+│       ├── style.py              # paleta y figuras comunes
+│       └── test_common.py
+├── docs/
+│   ├── DECISIONES.md             # registro de decisiones D-X.n
+│   ├── teoria/                   # síntesis del material de clase
+│   └── raw/                      # material de clase (local, no versionado)
+└── results/
+    ├── NN_*.csv                  # resultados de cada notebook (esquema común)
+    ├── taller1_tabular.csv       # referencia: baselines, Q-Learning y SARSA del Taller 1
+    ├── data/                     # S&P 500 con procedencia y huella
+    ├── figures/  models/         # figuras y pesos finales
+    └── informe.md                # entregable → build_informe.py → PDF de 2 páginas
+```
+
+## Puesta en marcha
+
+En Windows (PowerShell), desde la carpeta del proyecto:
+
+```powershell
+py -3.13 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m ipykernel install --user --name deep-rl-trading --display-name "Python (Deep RL Trading)"
+.\.venv\Scripts\python.exe -m jupyterlab notebooks/
+```
+
+En otros sistemas:
+
+```bash
+pip install -r requirements.txt
+jupyter lab notebooks/
+```
+
+Basta con la CPU: las redes son pequeñas. El material de clase no se versiona; quien lo necesite lo copia en
+`docs/raw/`.
+
+Pruebas: `.\.venv\Scripts\python.exe -m unittest discover -s notebooks/common -t notebooks`.
+
+## Cómo trabajar en paralelo
+
+- **Líneas independientes:** 01 (DQN), 02 (A3C) y 03 (extras) no dependen entre sí. Cada una guarda sus resultados
+  con su prefijo (`results/NN_<nombre>.csv`), y el 04 los concatena.
+- **El código va en `common/`** y el notebook lo usa para experimentar y analizar. Es además obligatorio para A3C y
+  `run_grid`: en Windows, los procesos no pueden importar funciones definidas en una celda.
+- **Notebooks:** los edita una sola persona a la vez y se suben ejecutados. Si hay conflicto, git conserva tu versión
+  sin romper el JSON (`.gitattributes`). Para probar libremente, usa `notebooks/scratch_*.ipynb`, que no se versiona.
+- **Decisiones:** cada una que afecte a los resultados se añade a [`docs/DECISIONES.md`](docs/DECISIONES.md); dos
+  personas pueden añadir a la vez sin conflicto.
+
+**Contrato común:**
+
+- `common/env.py` y los 4 generadores son copia literal del enunciado y no se modifican (lo comprueba un test).
+- Todo agente implementa `act(obs, greedy=False)`, y con eso `evaluate()` lo mide igual que a los baselines.
+- Las series no se eligen a mano: train con `train_series_seed(seed, episodio)`, y validación y test con
+  `evaluate(agente, mercado, split=...)`. Los hiperparámetros se eligen en validación y el test se usa una sola vez.
+- `save_results()` escribe las columnas `agente, mercado, retorno_mediana, retorno_medio, std, sharpe, max_drawdown,
+  n_trades, episodios_convergencia, tiempo_s`. La métrica principal es la mediana del retorno.
+- `run_grid()` entrena en paralelo con caché. La caché depende de la configuración y de `version`: si cambia el
+  algoritmo de verdad, se sube `version`.
+- El protocolo es el del Taller 1 y reproduce sus baselines, así que DQN y A3C se comparan directamente con los
+  tabulares de `results/taller1_tabular.csv`.
+
+## Documentación
+
+- [`docs/DECISIONES.md`](docs/DECISIONES.md): decisiones del proyecto, cerradas y abiertas.
+- `docs/teoria/`: síntesis del material de clase, con la fuente citada en cada concepto.
+
+## Estado
+
+- [x] Estructura del repositorio y código común
+- [x] 00 Entorno y baselines
+- [ ] Documentación de teoría (`docs/teoria/`)
+- [ ] 01 DQN
+- [ ] 02 A3C
+- [ ] 03 Extras
+- [ ] 04 Comparativa
+- [ ] Informe PDF (`results/informe.pdf`, se regenera con `python results/build_informe.py`)

@@ -218,3 +218,27 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---------------------------------------------------------------
+# Proyecto deep-rl-trading-agents
+# ---------------------------------------------------------------
+# Material bruto de clase (privado, no se versiona)
+docs/raw/
+docs_rl/
+
+# Notebooks personales de prueba
+notebooks/scratch_*.ipynb
+
+# Caché de entrenamientos (se regenera)
+results/cache/
+
+# Objetos serializados intermedios (los pesos finales van en results/models/*.pt)
+*.npy
+*.npz
+*.pkl
+
+# Intermedios del informe (se regeneran con results/build_informe.py)
+results/informe.html
+results/informe_p*.png
+
+.DS_Store

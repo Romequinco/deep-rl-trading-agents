@@ -1,0 +1,7 @@
+* text=auto
+
+# Un conflicto en un notebook conserva tu versión en vez de meter marcas que rompen el JSON
+*.ipynb -merge
+
+# Dos personas pueden añadir decisiones a la vez sin conflicto
+docs/DECISIONES.md merge=union
