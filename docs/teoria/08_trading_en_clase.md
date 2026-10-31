@@ -293,7 +293,7 @@ Cada punto da lo que hace el código y la corrección razonada.
 - La recompensa de `SimpleTradingEnv` se parece al *mark-to-market* del que habló el profesor ("le estás dando en cada momento la composición de tu cartera si mejora o no", T30 ~03:28:21).
 - En clase el agente puede comprar varios paquetes; en el Taller solo hay dos estados de cartera. El problema es más sencillo, pero la política óptima se reduce a "cuándo estar dentro".
 - El estado de dos números del Taller **resume** la historia (una media de 6 precios); el de clase da la ventana completa de retornos (más información, más dimensiones).
-- **Nota:** escala del estado en el Taller: la tendencia es del orden de 0,01-0,05 mientras la posición es 0/1; conviene reescalar la tendencia (p. ej. ×20-50) o estandarizar, siguiendo el aviso de T30 ~00:34:09 sobre escalas.
+- **Nota:** escala del estado en el Taller: la tendencia es del orden de 0,01-0,05 mientras la posición es 0/1; D-1.1 (cerrada) la divide por su σ de train, en línea con el aviso de T30 ~00:34:09 sobre escalas.
 
 *Fuente: 01-AR_trading_prueba celda 9; PC5 celdas 1, 8; taller_trader2 celdas 3, 4, 19-22; T30 ~03:28:10-03:29:07. La tabla y las notas de escala son comparación propia.*
 
@@ -311,7 +311,7 @@ Para el Taller (DQN y A3C, `SimpleTradingEnv` con observación `[tendencia, posi
 **Qué conviene arreglar respecto al código de clase.**
 - Decaimiento de $\epsilon$: por episodios de 494 pasos y con muchos episodios, evitar el caso del notebook 1 (ε≈0,9 al final).
 - Decidir cómo tratar el fin de la serie (§9, #7): como *truncation* (no anular el bootstrapping en el último paso), que es lo que propone este documento, o como terminal, como en el Taller 1. D-1.2 sigue abierta; la regla debe ser la misma en DQN y A3C.
-- Escalar las entradas y las recompensas (≈1e-3): la señal es pequeña y la red puede quedarse en $Q\approx0$; se puede multiplicar la recompensa por una constante (p. ej. 100) en el agente sin tocar el entorno.
+- Escalar las entradas y las recompensas (≈1e-3): la señal es pequeña y la red puede quedarse en $Q\approx0$. D-1.1 (cerrada) lo hace en el agente con `train_scales(mercado)`, sin tocar el entorno.
 - No usar `lr=`: `learning_rate=`.
 
 **Extras que se pueden ensayar** (cada uno es opcional y cuenta como "pruebas que van más allá de los mínimos", 10 % de la nota):

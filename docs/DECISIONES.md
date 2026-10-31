@@ -28,6 +28,9 @@ Formato ligero tipo ADR, como en el Taller 1. ID `D-X.n`: `X` es el bloque (0 ge
 - **A3C:** con procesos que comparten memoria (`share_memory`, `spawn`), probado con 3 procesos actualizando los mismos
   pesos desde un módulo importado. El arranque cuesta unos 19 s, casi todo imports, así que conviene lanzarlos una vez
   por entrenamiento.
+- **Medición en el equipo actual (Ryzen 5 3600, 6 núcleos físicos y 12 lógicos; solo PyTorch, `00_entorno_y_baselines`, §7):**
+  evaluar un episodio con `evaluate()` cuesta 0,05 s y un paso de entrenamiento (batch de 128), unos 0,64 ms. Lanzar 3 procesos cuesta unos
+  3 s. Con todos los procesos a la vez, 3 rinden x2,5 y 11, x5,5.
 - **Coste asumido:** el código de clase está en Keras y hay que traducirlo.
 - **Estado:** CERRADA
 
