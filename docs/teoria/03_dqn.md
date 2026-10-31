@@ -751,7 +751,7 @@ Las celdas 0-1, 4 son importaciones y vídeo; 5 está vacía; 7 crea el entorno;
 **Directo del material:**
 
 - **Red:** entrada 2, una o dos capas densas pequeñas con ReLU, salida lineal de 3 (§3). Es un problema con menos entradas que CartPole, y el profesor considera excesivas 100 neuronas allí. No hay fotogramas: la observación ya contiene la tendencia.
-- **Transición:** guardar $(s,a,r,s',\text{done})$ y aplicar $y=r$ en estados terminales (§5). **Nota:** el entorno devuelve `terminated=True` al acabarse la serie, pero es un límite de tiempo y D-1.2 sigue **ABIERTA**: o $y=r$ en el último paso, o seguir estimando con $s'$. Afecta a 1 de 494 pasos; usad la misma regla en DQN y A3C.
+- **Transición:** guardar $(s,a,r,s',\text{done})$ y aplicar $y=r$ en estados terminales (§5). **Nota:** el entorno devuelve `terminated=True` al acabarse la serie, pero es un límite de tiempo. D-1.2 (cerrada) lo mantiene como terminal, con $y=r$ en el último paso. Afecta a 1 de 494 pasos, y la regla es la misma en DQN y A3C.
 - **Coste y optimización:** MSE con una pasada por minibatch; Adam primero y SGD o un $\alpha$ menor si es inestable (§10). Probar Huber si hay errores grandes.
 - **Test *greedy*:** $\varepsilon=0$, sin actualizaciones, y varias series (protocolo D-0.1 de [DECISIONES.md](../DECISIONES.md)). Seguir la curva suavizada, sin fiarse de un episodio.
 - **Serie nueva por episodio:** lo que recomienda el profesor con las fechas aleatorias (T30 ~02:57), y ya está en D-0.1.

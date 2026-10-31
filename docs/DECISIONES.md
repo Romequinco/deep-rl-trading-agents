@@ -43,10 +43,17 @@ Formato ligero tipo ADR, como en el Taller 1. ID `D-X.n`: `X` es el bloque (0 ge
 - **Reglas simples como referencia:** una regla de tendencia y otra de reversión, con un solo umbral elegido en
   validación. En test baten a los tabulares del Taller 1 (x630 frente a x502 en el mercado 1, +29,2 % frente a +27,0 %
   en el 3), así que son el listón real para DQN y A3C (`00_entorno_y_baselines`, §6).
-- **Problema abierto:** `convergence_episode` (Taller 1) mide la recompensa online. No significa nada si el agente acaba
+- **Problema:** `convergence_episode` (Taller 1) mide la recompensa online. No significa nada si el agente acaba
   sin operar, y no compara bien algoritmos con hiperparámetros distintos. Con A3C, además, los episodios transcurren en
-  paralelo. Propuesta a valorar: pasos de entorno y tiempo hasta alcanzar el resultado en validación de la política greedy.
-- **Estado:** ABIERTA (criterio de convergencia para DQN y A3C)
+  paralelo.
+- **Decisión sobre la convergencia:** se registran y se pintan dos curvas, ambas con el retorno sobre el balance para que
+  sean comparables. Con exploración: el retorno de cada episodio de entrenamiento, suavizado con una mediana móvil. Sin
+  exploración: la mediana del retorno de la política greedy cada 25-50 episodios, sobre unas 20 series de validación
+  siempre iguales. En A3C, "con exploración" es muestrear de la política y "sin exploración", la acción más probable.
+- **Qué va a la tabla:** la convergencia se mide en la curva sin exploración: el primer punto que recorre el 90 % del
+  camino entre su valor inicial y el final (la misma regla que `convergence_episode`), en episodios, pasos de entorno y
+  segundos. Si el agente acaba sin operar, se indica "no opera". La distancia entre las dos curvas se comenta en el análisis.
+- **Estado:** CERRADA
 
 ### D-0.4 · Estructura y trabajo en paralelo
 
@@ -97,7 +104,13 @@ Formato ligero tipo ADR, como en el Taller 1. ID `D-X.n`: `X` es el bloque (0 ge
   realidad es un límite de tiempo. En el Taller 1 se trató como terminal, con efecto en 1 de 494 pasos (allí, D-2.1).
 - **Alternativas:** mantenerlo como terminal (objetivo `r`) o tratar el último paso como truncado y seguir estimando
   el valor de `s'`, sin tocar el entorno.
-- **Estado:** ABIERTA
+- **Decisión:** el final de la serie es terminal, tal como lo devuelve el entorno. En DQN, el objetivo del último paso es
+  `y = r`; en A3C, el retorno del último tramo parte de `R = 0`. La misma regla en los dos algoritmos.
+- **Justificación:** es lo explicado en clase (T30 ~04:35-04:37: en el estado final no se calcula el valor futuro), es
+  más simple, coincide con el Taller 1 y mantiene la comparación con sus tabulares. Afecta a 1 de 494 pasos.
+- **Límite:** es una simplificación, porque la serie se corta por tiempo y la observación no incluye cuánto queda. Si
+  el agente se comporta de forma rara al final del episodio, hay que revisarla.
+- **Estado:** CERRADA
 
 ### D-2.1 · Variante de A3C
 

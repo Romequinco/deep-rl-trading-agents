@@ -335,7 +335,7 @@ A3C elige otra vía: en cualquier momento, los *workers* están viendo estados d
 - **D-0.2.** PyTorch en CPU, con `share_memory` y `spawn`, probado con 3 procesos. El arranque cuesta unos 19 s, casi todo imports: lanzad los procesos una vez por entrenamiento.
 - **`a3c.py`.** `A3CConfig`: `gamma=0.99`, `lr=0.01`, `hidden=128`, `n_workers=3` (deja un núcleo libre de 4), `t_max=20`, `entropy_coef=0.01`, `n_episodes=500`. El propio archivo aclara que `gamma`, `lr` y `hidden` vienen del notebook, y que `t_max` y `entropy_coef` "son solo un punto de partida". Interfaz: `A3CAgent.act(obs, greedy)`, `worker(rank, shared_model, optimizer, cfg, market, seed, n_steps, log)`, `train_a3c(cfg, market, seed, n_steps)`.
 - **D-1.1 está cerrada:** observación y recompensa se escalan con `train_scales(mercado)`, y falta confirmarlo en A3C.
-- **Otras decisiones abiertas que afectan a A3C.** D-1.2 (fin de episodio: si en el último paso $R=0$ o se sigue estimando con $V(s')$; en A3C es el `R = 0 si terminal` del pseudocódigo) y D-0.3 (criterio de convergencia con episodios en paralelo).
+- **Otras decisiones cerradas que afectan a A3C.** D-1.2 (fin de episodio: el último tramo parte de $R=0$, el `R = 0 si terminal` del pseudocódigo) y D-0.3 (convergencia medida en la curva de la política *greedy* en validación, también con episodios en paralelo).
 
 **Tres puntos de `A3CConfig` que conviene revisar:**
 
@@ -401,7 +401,7 @@ Medido en las 100 series de validación (semillas 50 000–50 099), retorno por 
 
 ### Esqueleto del `worker`
 
-Ejecutado una vez como prueba de humo con PyTorch 2.15 en Windows: 3 procesos con `spawn`, browniano y 6 episodios por *worker* a partir del código de abajo, sin errores y con pesos compartidos que cambian. El contador de Adam pasó de 1 a 445, cuando se hicieron $3\times6\times25=450$ actualizaciones: se perdieron algunas cuentas, lo esperable al escribir sin cerrojos, y por eso ese contador no sirve para contar actualizaciones (en una segunda ejecución llegó a 448). **Solo comprueba la mecánica, no que aprenda.** El esqueleto trata el fin de serie como terminal ($R=0$), una de las dos alternativas de D-1.2, que sigue abierta; la otra exige seguir estimando con $V(s')$ también cuando `terminated=True`, lo que el entorno permite porque la observación final es válida. `VALUE_COEF`, `REWARD_SCALE` y `MAX_GRAD_NORM` no están en `A3CConfig`; sus valores son marcadores a ajustar.
+Ejecutado una vez como prueba de humo con PyTorch 2.15 en Windows: 3 procesos con `spawn`, browniano y 6 episodios por *worker* a partir del código de abajo, sin errores y con pesos compartidos que cambian. El contador de Adam pasó de 1 a 445, cuando se hicieron $3\times6\times25=450$ actualizaciones: se perdieron algunas cuentas, lo esperable al escribir sin cerrojos, y por eso ese contador no sirve para contar actualizaciones (en una segunda ejecución llegó a 448). **Solo comprueba la mecánica, no que aprenda.** El esqueleto trata el fin de serie como terminal ($R=0$), que es lo que decide D-1.2. `VALUE_COEF`, `REWARD_SCALE` y `MAX_GRAD_NORM` no están en `A3CConfig`; sus valores son marcadores a ajustar.
 
 ```python
 import torch, torch.nn as nn, torch.nn.functional as F
