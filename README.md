@@ -107,13 +107,26 @@ Pruebas: `.\.venv\Scripts\python.exe -m unittest discover -s notebooks/common -t
 ## Documentación
 
 - [`docs/DECISIONES.md`](docs/DECISIONES.md): decisiones del proyecto, cerradas y abiertas.
-- `docs/teoria/`: síntesis del material de clase, con la fuente citada en cada concepto.
+- `docs/teoria/`: síntesis del material de clase, con la fuente citada en cada concepto:
+  - [`notebook_partida.md`](docs/teoria/notebook_partida.md): enunciado, rúbrica, sutilezas del entorno, comentarios
+    del profesor, trampas y checklist. **Empezad por aquí.**
+  - [`00_fundamentos_mdp.md`](docs/teoria/00_fundamentos_mdp.md): RL, bandidos, MDP, retorno y γ, V y Q, Bellman.
+  - [`01_dp_y_montecarlo.md`](docs/teoria/01_dp_y_montecarlo.md): programación dinámica y Monte Carlo.
+  - [`02_td_sarsa_qlearning.md`](docs/teoria/02_td_sarsa_qlearning.md): TD(0), SARSA y Q-Learning.
+  - [`03_dqn.md`](docs/teoria/03_dqn.md): DQN, memoria de experiencias, red objetivo y consejos prácticos.
+    **Núcleo del taller.**
+  - [`04_doble_dqn_y_duelo.md`](docs/teoria/04_doble_dqn_y_duelo.md): Doble DQN y DQN en duelo.
+  - [`05_policy_gradient.md`](docs/teoria/05_policy_gradient.md): gradiente de la política y REINFORCE.
+  - [`06_actor_critico_y_a3c.md`](docs/teoria/06_actor_critico_y_a3c.md): actor-crítico, A2C y A3C. **Núcleo del taller.**
+  - [`07_panorama_drl.md`](docs/teoria/07_panorama_drl.md): taxonomía, hitos, aplicaciones, entornos y librerías.
+  - [`08_trading_en_clase.md`](docs/teoria/08_trading_en_clase.md): el DQN de trading de clase y qué ideas trasladar.
+  - [`COBERTURA.md`](docs/teoria/COBERTURA.md): a qué documento va cada página, celda y tramo del material de clase.
 
 ## Estado
 
 - [x] Estructura del repositorio y código común
 - [x] 00 Entorno y baselines
-- [ ] Documentación de teoría (`docs/teoria/`)
+- [x] Documentación de teoría (`docs/teoria/`)
 - [ ] 01 DQN
 - [ ] 02 A3C
 - [ ] 03 Extras
