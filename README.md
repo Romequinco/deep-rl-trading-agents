@@ -40,7 +40,7 @@ Continúa el Taller 1, con Q-Learning y SARSA tabulares:
 │   └── common/                   # código común: única fuente de verdad
 │       ├── env.py                # SimpleTradingEnv (copia literal del enunciado)
 │       ├── markets.py            # 4 generadores, extras del Taller 1 y S&P 500
-│       ├── agents.py             # baselines: aleatorio, buy & hold, no operar
+│       ├── agents.py             # referencias: aleatorio, buy & hold, no operar y reglas simples
 │       ├── protocol.py           # series, evaluate(), métricas, save_results(), run_grid()
 │       ├── dqn.py  a3c.py        # agentes (interfaz por implementar)
 │       ├── style.py              # paleta y figuras comunes

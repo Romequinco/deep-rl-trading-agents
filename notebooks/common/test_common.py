@@ -12,7 +12,8 @@ import pandas as pd
 
 from common import env as env_module
 from common import markets, protocol
-from common.agents import BuyHoldAgent, NoTradeAgent, RandomAgent, baseline_agents
+from common.agents import (BUY, HOLD, SELL, BuyHoldAgent, NoTradeAgent, RandomAgent, ReversionRuleAgent,
+                           TrendRuleAgent, baseline_agents)
 from common.env import SimpleTradingEnv
 from common.markets import load_sp500, make_prices
 
@@ -84,6 +85,12 @@ class TestProtocolo(unittest.TestCase):
                     continue
                 got = protocol.evaluate(agent, market)
                 self.assertAlmostEqual(got["retorno"].median(), row.retorno_mediana.item(), places=8, msg=f"{name} {market}")
+
+    def test_reglas_simples(self):
+        up, flat, down = np.array([0.02, 0.0]), np.array([0.0, 0.0]), np.array([-0.02, 0.0])
+        trend, reversion = TrendRuleAgent(0.01), ReversionRuleAgent(0.01)
+        self.assertEqual([trend.act(o) for o in (up, flat, down)], [BUY, HOLD, SELL])
+        self.assertEqual([reversion.act(o) for o in (up, flat, down)], [SELL, HOLD, BUY])
 
     def test_aleatorio_con_semilla(self):
         a, b = RandomAgent(seed=1), RandomAgent(seed=1)

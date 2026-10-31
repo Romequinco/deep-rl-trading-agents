@@ -37,6 +37,9 @@ Formato ligero tipo ADR, como en el Taller 1. ID `D-X.n`: `X` es el bloque (0 ge
 - **Decisión:** se mantienen las métricas del Taller 1: mediana del retorno como métrica principal, media ± std, Sharpe
   por paso, max drawdown y operaciones. Se añade el baseline `no_operar`, que en el Taller 1 batió a buy & hold en los
   mercados 2-4.
+- **Reglas simples como referencia:** una regla de tendencia y otra de reversión, con un solo umbral elegido en
+  validación. En test baten a los tabulares del Taller 1 (x630 frente a x502 en el mercado 1, +29,2 % frente a +27,0 %
+  en el 3), así que son el listón real para DQN y A3C (`00_entorno_y_baselines`, §6).
 - **Problema abierto:** `convergence_episode` (Taller 1) mide la recompensa online. No significa nada si el agente acaba
   sin operar, y no compara bien algoritmos con hiperparámetros distintos. Con A3C, además, los episodios transcurren en
   paralelo. Propuesta a valorar: pasos de entorno y tiempo hasta alcanzar el resultado en validación de la política greedy.
@@ -68,6 +71,8 @@ Formato ligero tipo ADR, como en el Taller 1. ID `D-X.n`: `X` es el bloque (0 ge
   (percentiles 5/95 ≈ ±0,23 en el mercado 1 y ≈ ±0,04 en el resto), y la recompensa es del orden de 1e-3 por paso.
 - **Alternativas:** normalizar la observación con estadísticos solo de train; escalar la recompensa; recortarla (clip),
   como propone la transparencia de mejoras de DQN.
+- **Evidencia (`00_entorno_y_baselines`, §3):** σ de la tendencia en train de 0,153 en el mercado 1 y ≈0,024 en el
+  resto, y distribuciones parecidas tras dividir por ella. Ruido del retorno entre 19 y 106 veces la comisión.
 - **Estado:** ABIERTA
 
 ### D-1.2 · Fin del episodio

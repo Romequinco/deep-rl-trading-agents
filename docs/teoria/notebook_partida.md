@@ -303,6 +303,7 @@ Convergencia del duelo con la misma configuración (T1:D-2.5). Otros datos del T
 - **Aleatorio:** `env.action_space.sample()` en cada paso (celda 19). En el repositorio, `RandomAgent(seed=0)`.
 - **Buy & hold:** compra en `prices[5]` con comisión y valora a mercado hasta el final, sin vender (celda 21). `BuyHoldAgent` lo reproduce con la acción "comprar" y `test_common.py` lo comprueba.
 - **No operar (nuestro):** `NoTradeAgent` (D-0.3).
+- **Reglas simples (nuestro):** `TrendRuleAgent` y `ReversionRuleAgent`, con el umbral elegido en validación. En test dan x630 en el mercado 1 y +29,2 % en el 3, más que los tabulares del Taller 1: son el listón real (notebook 00, §6; D-0.3).
 - **La figura (celda 21):** arriba, el precio con puntos verdes (con activo) y rojos (sin él); abajo, el balance del agente frente a buy & hold y al capital inicial. En el ejemplo, sobre el mercado 1, el precio pasa de ≈100 a un pico de ≈4 750 y acaba en ≈2 500; el aleatorio termina en ≈1 500 y buy & hold en ≈21 000, tras un pico de ≈43 000. Lo comenta el profesor en T23 ~04:35-04:36.
 - **Errata de la celda 21. Nota:** `bh_balances` tiene un elemento por cada precio desde `prices[0]`, mientras que `balances` empieza en `prices[5]`: la curva de buy & hold queda **desplazada 5 pasos**. `plot_episode` de `common/style.py` ya lo alinea: usad esa función.
 - `run_episode` y `evaluate` de `common/protocol.py` miden a todos con el mismo código. Basta con que el agente implemente `act(obs, greedy=False)`.

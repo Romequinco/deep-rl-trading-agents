@@ -13,6 +13,8 @@ AGENT_COLORS = {
     "aleatorio": "#9AA0A6",
     "buy_hold": "#F29D38",
     "no_operar": "#5F6368",
+    "regla_tendencia": "#00A3A3",
+    "regla_reversion": "#B56AC9",
     "qlearning": "#2B6CB0",
     "sarsa": "#2F9E6E",
     "dqn": "#6C5CE7",
