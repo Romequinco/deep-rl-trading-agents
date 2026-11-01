@@ -27,6 +27,13 @@ def margen_log(mercado):
     return float(np.log(MARGEN_MULTIPLO[mercado])) if mercado in MARGEN_MULTIPLO else MARGEN[mercado]
 
 
+def ventaja_emparejada(retornos, referencia):
+    """Ventaja en log(1 + retorno) frente a `referencia`, serie a serie y semilla a semilla. Ambos: una lista por semilla,
+    con el retorno de cada serie. Devuelve la mediana entre semillas de la mediana por serie, y cuántas semillas ganan."""
+    por_semilla = [float(np.median(np.log1p(a) - np.log1p(b))) for a, b in zip(retornos, referencia)]
+    return float(np.median(por_semilla)), sum(v > 0 for v in por_semilla)
+
+
 class Ajuste:
     """Estado del ajuste: `actual[mercado]` es la configuración vigente y `puntos[mercado]`, su mediana en validación."""
 

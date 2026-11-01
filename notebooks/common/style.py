@@ -20,8 +20,6 @@ AGENT_COLORS = {
     "sarsa": "#2F9E6E",
     "dqn": "#6C5CE7",
     "a3c": "#D63031",
-    "dqn_mejorado": "#3B2FB5",
-    "dqn_estado": "#A29BFE",
 }
 MARKET_COLORS = {
     "tendencia_ciclo": "#6C5CE7",

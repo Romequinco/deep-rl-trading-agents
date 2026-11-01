@@ -1,0 +1,5 @@
+modelos,mercado,split,conjunto,agente,retorno_mediana,retorno_medio,std,sharpe,max_drawdown,n_trades,episodios_convergencia,tiempo_s,id
+"['dqn_tendencia_ciclo_s0', 'dqn_tendencia_ciclo_s1', 'dqn_tendencia_ciclo_s2', 'dqn_tendencia_ciclo_s3', 'dqn_tendencia_ciclo_s4']",tendencia_ciclo,val,True,dqn_mejorado,595.8434101511449,1530.8207791269397,3185.786868198649,0.1827801449366881,0.6963203109405444,59.06,,0.0,40f871f60a144276
+"['dqn_browniano_s0', 'dqn_browniano_s1', 'dqn_browniano_s2', 'dqn_browniano_s3', 'dqn_browniano_s4']",browniano,val,True,dqn_mejorado,0.0,0.023959691011870232,0.17676002527130216,0.0036528604759836557,0.07203913397786338,0.28,,0.0,e19fa8b04ced02f8
+"['dqn_reversion_media_s0', 'dqn_reversion_media_s1', 'dqn_reversion_media_s2', 'dqn_reversion_media_s3', 'dqn_reversion_media_s4']",reversion_media,val,True,dqn_mejorado,0.256327424895731,0.2907805785011462,0.24955472671793044,0.03953936634849323,0.21015089927270217,42.18,,0.0,5996ff67d7fe491d
+"['dqn_regimenes_s0', 'dqn_regimenes_s1', 'dqn_regimenes_s2', 'dqn_regimenes_s3', 'dqn_regimenes_s4']",regimenes,val,True,dqn_mejorado,0.0,0.0,0.0,0.0,0.0,0.0,,0.0,f6ba06e34a9e0da7

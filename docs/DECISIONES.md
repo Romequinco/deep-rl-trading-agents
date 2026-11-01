@@ -52,7 +52,7 @@ Formato ligero tipo ADR, como en el Taller 1. ID `D-X.n`: `X` es el bloque (0 ge
   siempre iguales. En A3C, "con exploración" es muestrear de la política y "sin exploración", la acción más probable.
 - **Qué va a la tabla:** la convergencia se mide en la curva sin exploración: el primer punto que recorre el 90 % del
   camino entre su valor inicial y el final (la misma regla que `convergence_episode`), en episodios, pasos de entorno y
-  segundos. Si el agente acaba sin operar, se indica "no opera". La distancia entre las dos curvas se comenta en el análisis.
+  segundos. Si el agente acaba sin operar, se indica "no opera", y si acaba peor que al empezar, "no mejora": en ninguno de los dos casos hay nada que haya convergido. La distancia entre las dos curvas se comenta en el análisis.
 - **Estado:** CERRADA
 
 ### D-0.4 · Estructura y trabajo en paralelo
@@ -146,11 +146,25 @@ Formato ligero tipo ADR, como en el Taller 1. ID `D-X.n`: `X` es el bloque (0 ge
 ### D-2.4 · El test ya visto no se vuelve a usar para elegir
 
 - **Fecha:** 2026-11-01
-- **Contexto:** D-0.1 dice que el test se usa una sola vez, y el resultado de DQN ya se ha visto. Interesa mejorar el agente.
-- **Decisión:** `results/01_dqn.csv` es el resultado de referencia y no se sobrescribe. Toda mejora se elige solo en validación y
-  va en filas aparte (`dqn_mejorado`, `dqn_estado`, notebook 03), que se evalúan una vez en el mismo test, para compararlas con el
-  Taller 1, y otra en 400 series que no se han usado para nada (`split="nuevas"`, semillas desde 400 000). El informe debe decir
-  que ese test ya se había visto.
+- **Contexto:** D-0.1 dice que el test se usa una sola vez, y el resultado de DQN ya se ha visto. Interesa intentar mejorarlo.
+- **Decisión:** `results/01_dqn.csv` es el resultado de DQN y no se sobrescribe. Toda mejora se elige solo en validación, y se mide
+  en 400 series que no se han usado para nada (`split="nuevas"`, semillas desde 400 000). El informe debe decir que el test ya se
+  había visto si cita alguna cifra posterior.
+- **Estado:** CERRADA
+
+### D-2.5 · Mejoras probadas sobre el DQN
+
+- **Fecha:** 2026-11-01
+- **Decisión:** se prueban cuatro mejoras baratas en el §7 de `01_dqn`, con 5 semillas y comparando en las mismas series de
+  validación: acciones canónicas con Doble DQN, recompensa logarítmica, mejor punto en validación y media de las 5 redes. Se adoptan
+  con el margen de D-2.3 expresado en logaritmo. Las cuatro son opciones de `DQNConfig` o `EnsembleAgent` que por defecto no cambian
+  el agente base.
+- **Resultado:** ninguna supera el margen, así que el DQN base se queda en los 4 mercados y no hay fila `dqn_mejorado`. Canónicas con
+  Doble y recompensa logarítmica hacen operar más en los mercados 2 y 4 (hasta 23 operaciones frente a 0,1), contra lo esperado.
+- **Comprobación en series nuevas, solo informativa:** el mejor punto da x356,7 frente a x287,4 en el mercado 1 y +29,6 % frente a
+  +24,5 % en el 3, y elimina las semillas malas (peor semilla del 3: de +5,4 % a +24,5 %). No alcanza a las reglas (x530,2 y +32,7 %).
+- **Límite:** la regla mira la mediana entre semillas, y por eso no recoge una mejora que actúa sobre las peores. Se decidió no cambiar
+  la regla después de ver los datos: el mejor punto se presenta como la mejora más prometedora, medida una sola vez.
 - **Estado:** CERRADA
 
 ### D-2.1 · Variante de A3C

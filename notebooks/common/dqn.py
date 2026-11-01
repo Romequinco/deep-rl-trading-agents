@@ -1,10 +1,13 @@
 """DQN con PyTorch (D-0.2, diseño en D-2.2).
 
+Las opciones marcadas como mejora las usa el §7 del notebook 01 (D-2.5). Con sus valores por defecto, el agente es el base.
+
 Se implementa aquí y no en el notebook para poder lanzar barridos con `run_grid`.
 Observación y recompensa se escalan dentro del agente con `train_scales(mercado)` (D-1.1): `evaluate()` y el
 entorno siguen trabajando con los valores reales. El final de la serie es terminal (D-1.2).
 """
 
+import copy
 import time
 from dataclasses import asdict, dataclass, fields
 
@@ -38,6 +41,10 @@ class DQNConfig:
     n_episodes: int = 500
     eval_every: int = 25  # episodios entre puntos de la curva sin exploración (D-0.3)
     n_eval: int = 20  # series de validación de cada punto
+    # Mejoras (notebook 01, §7)
+    double_canonical: bool = False  # Doble DQN, y una acción que no hace nada cuenta como mantener
+    log_reward: bool = False  # aprende con log(balance siguiente / balance), que es lo que manda en el capital
+    best_checkpoint: bool = False  # se queda con el mejor punto en validación, no con el último
 
 
 class DQNAgent:
@@ -82,11 +89,16 @@ class DQNAgent:
         """Acción epsilon-greedy; con `greedy=True`, la de mayor Q."""
         if not greedy and self.rng.random() < self.epsilon:
             return int(self.rng.integers(self.n_actions))
-        return int(self.q_values(obs).argmax())
+        q = self.q_values(obs)
+        if self.cfg.double_canonical:
+            q[SELL if obs[1] < 0.5 else BUY] = -np.inf
+        return int(q.argmax())
 
     def remember(self, obs, action, reward, next_obs, done):
         """Guarda la transición ya escalada, en una memoria circular que borra lo más antiguo."""
         i = self.position
+        if self.cfg.double_canonical and action == (SELL if obs[1] < 0.5 else BUY):
+            action = HOLD
         self.s[i], self.a[i], self.r[i] = self._scale_obs(obs), action, reward / self.scale_reward
         self.s2[i], self.done[i] = self._scale_obs(next_obs), float(done)
         self.position = (i + 1) % self.cfg.memory_size
@@ -100,7 +112,15 @@ class DQNAgent:
         """Objetivo de Bellman, sin gradiente: y = r si el episodio termina (D-1.2)."""
         with torch.no_grad():
             net = self.q_target if self.cfg.use_target else self.q
-            return r + self.cfg.gamma * (1.0 - done) * net(s2).max(dim=1).values
+            values = net(s2)
+            if not self.cfg.double_canonical:
+                return r + self.cfg.gamma * (1.0 - done) * values.max(dim=1).values
+            # La red que aprende elige entre las dos acciones con efecto, y la objetivo la valora
+            chooser = self.q(s2).clone()
+            has_asset = s2[:, 1] >= 0.5
+            chooser[~has_asset, SELL] = -torch.inf
+            chooser[has_asset, BUY] = -torch.inf
+            return r + self.cfg.gamma * (1.0 - done) * values.gather(1, chooser.argmax(dim=1, keepdim=True)).squeeze(1)
 
     def learn(self):
         """Un paso de entrenamiento con un minibatch de la memoria. Devuelve la pérdida."""
@@ -158,9 +178,12 @@ def train_dqn(cfg, market, seed=0, n_steps=N_STEPS):
     history = {"recompensa": [], "retorno": [], "trades": [], "val_episodios": [], "val_retorno": [], "val_trades": [],
                "val_tiempo": []}
     train_time = 0.0
+    saved = []
 
     def checkpoint(episode):
         df = evaluate(agent, market, n_test=cfg.n_eval, n_steps=n_steps, split="val")
+        if cfg.best_checkpoint:
+            saved.append((float(df["retorno"].median()), episode, copy.deepcopy(agent.q.state_dict())))
         history["val_episodios"].append(episode)
         history["val_retorno"].append(float(df["retorno"].median()))
         history["val_trades"].append(float(df["n_trades"].mean()))
@@ -176,8 +199,11 @@ def train_dqn(cfg, market, seed=0, n_steps=N_STEPS):
         while not terminated:
             action = agent.act(obs)
             trades += (action == BUY and env.position == 0) or (action == SELL and env.position == 1)
-            next_obs, reward, terminated, _, _ = env.step(action)
-            agent.remember(obs, action, reward, next_obs, terminated)
+            balance = env.balance
+            next_obs, reward, terminated, _, info = env.step(action)
+            # El entorno y las métricas no cambian: solo aquello con lo que aprende el agente
+            learned = float(np.log(info["balance"] / balance)) if cfg.log_reward else reward
+            agent.remember(obs, action, learned, next_obs, terminated)
             agent.step_done()
             obs = next_obs
             total += reward
@@ -187,7 +213,46 @@ def train_dqn(cfg, market, seed=0, n_steps=N_STEPS):
         history["retorno"].append(env.balance / env.initial_balance - 1)
         history["trades"].append(trades)
     checkpoint(cfg.n_episodes)
+    if cfg.best_checkpoint:
+        history["punto_elegido"] = [select_checkpoint(agent, market, saved, n_steps=n_steps)]
     return agent, {k: np.array(v) for k, v in history.items()}, train_time
+
+
+def select_checkpoint(agent, market, saved, n_best=3, n_steps=N_STEPS):
+    """Carga el mejor punto guardado. Cada punto se midió con pocas series, así que los mejores, junto con el último, se
+    vuelven a medir con todas las de validación antes de elegir. Devuelve el episodio elegido."""
+    order = sorted(range(len(saved)), key=lambda i: saved[i][0], reverse=True)
+    best_score, best_index = -np.inf, len(saved) - 1
+    for i in sorted({*order[:n_best], len(saved) - 1}):
+        agent.q.load_state_dict(saved[i][2])
+        score = float(evaluate(agent, market, n_steps=n_steps, split="val")["retorno"].median())
+        if score > best_score:
+            best_score, best_index = score, i
+    agent.q.load_state_dict(saved[best_index][2])
+    return saved[best_index][1]
+
+
+class EnsembleAgent:
+    """Decide con la media de la Q de varios agentes entrenados. Solo sirve para evaluar."""
+
+    def __init__(self, agents):
+        self.agents = agents
+
+    def act(self, obs, greedy=True):
+        q = np.mean([a.q_values(obs) for a in self.agents], axis=0)
+        if self.agents[0].cfg.double_canonical:
+            q[SELL if obs[1] < 0.5 else BUY] = -np.inf
+        return int(q.argmax())
+
+
+def evalua_modelos(params):
+    """Función para `run_grid`: evalúa modelos ya guardados, sin entrenar. `params`: `modelos` (nombres), `mercado`, `split`
+    y `conjunto` (True: un solo agente con la media de sus Q; False: el primero de la lista)."""
+    torch.set_num_threads(1)
+    agents = [DQNAgent.load(name) for name in params["modelos"]]
+    agent = EnsembleAgent(agents) if params.get("conjunto") else agents[0]
+    df = evaluate(agent, params["mercado"], split=params["split"])
+    return {"fila": summarize("dqn_mejorado", params["mercado"], df), "curva": df["retorno"].to_numpy()}
 
 
 def entrena_y_evalua(params):

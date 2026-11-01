@@ -42,7 +42,9 @@ Continúa el Taller 1, con Q-Learning y SARSA tabulares:
 │       ├── markets.py            # 4 generadores, extras del Taller 1 y S&P 500
 │       ├── agents.py             # referencias: aleatorio, buy & hold, no operar y reglas simples
 │       ├── protocol.py           # series, evaluate(), métricas, save_results(), run_grid()
-│       ├── dqn.py  a3c.py        # agentes (interfaz por implementar)
+│       ├── dqn.py                # DQN y sus opciones de mejora
+│       ├── a3c.py                # A3C (interfaz por implementar)
+│       ├── tuning.py             # ajuste por etapas y margen de ruido
 │       ├── style.py              # paleta y figuras comunes
 │       └── test_common.py
 ├── docs/
@@ -96,13 +98,28 @@ Pruebas: `.\.venv\Scripts\python.exe -m unittest discover -s notebooks/common -t
 - `common/env.py` y los 4 generadores son copia literal del enunciado y no se modifican (lo comprueba un test).
 - Todo agente implementa `act(obs, greedy=False)`, y con eso `evaluate()` lo mide igual que a los baselines.
 - Las series no se eligen a mano: train con `train_series_seed(seed, episodio)`, y validación y test con
-  `evaluate(agente, mercado, split=...)`. Los hiperparámetros se eligen en validación y el test se usa una sola vez.
+  `evaluate(agente, mercado, split=...)`. Los hiperparámetros se eligen en validación y el test se usa una sola vez. Lo que se elija después
+  de ver el test se mide en `split="nuevas"` (D-2.4).
 - `save_results()` escribe las columnas `agente, mercado, retorno_mediana, retorno_medio, std, sharpe, max_drawdown,
   n_trades, episodios_convergencia, tiempo_s`. La métrica principal es la mediana del retorno.
 - `run_grid()` entrena en paralelo con caché. La caché depende de la configuración y de `version`: si cambia el
   algoritmo de verdad, se sube `version`.
 - El protocolo es el del Taller 1 y reproduce sus baselines, así que DQN y A3C se comparan directamente con los
   tabulares de `results/taller1_tabular.csv`.
+
+## Resultado de DQN (`01_dqn`)
+
+Mediana del retorno en las 200 series de test, con 5 semillas. Hiperparámetros: α = 0,001, γ = 0,9, decaimiento de ε 0,995 y 500 episodios.
+
+| Mercado | DQN | Rango entre semillas | Buy & hold | Q-Learning | Mejor referencia |
+|---|---|---|---|---|---|
+| 1 · Tendencia + ciclo | x299,8 | x228 a x558 | x33,6 | x502,3 | Regla de tendencia: x630,4 |
+| 2 · Browniano | −3,9 % | −6,4 % a 0 % | −3,5 % | 0 % | No operar: 0 % |
+| 3 · Reversión a la media | +20,5 % | +4,7 % a +26,3 % | −0,3 % | +27,0 % | Regla de reversión: +29,2 % |
+| 4 · Regímenes | 0 % | −7,9 % a 0 % | −12,5 % | 0 % | No operar: 0 % |
+
+Bate a buy & hold donde hay señal, pero no a las reglas ni a los tabulares. Ninguna de las cuatro mejoras probadas supera el margen de
+ruido (D-2.5); la más prometedora es quedarse con el mejor punto en validación.
 
 ## Documentación
 
@@ -127,7 +144,7 @@ Pruebas: `.\.venv\Scripts\python.exe -m unittest discover -s notebooks/common -t
 - [x] Estructura del repositorio y código común
 - [x] 00 Entorno y baselines
 - [x] Documentación de teoría (`docs/teoria/`)
-- [ ] 01 DQN
+- [x] 01 DQN
 - [ ] 02 A3C
 - [ ] 03 Extras
 - [ ] 04 Comparativa

@@ -102,10 +102,9 @@ def evaluate(agent, market, n_test=None, n_steps=N_STEPS, greedy=True, split="te
     """
     offset = {"test": TEST_SEED_OFFSET, "val": VAL_SEED_OFFSET, "nuevas": FRESH_SEED_OFFSET}[split]
     n_test = n_test or {"test": N_TEST, "val": N_VAL, "nuevas": N_FRESH}[split]
-    env_cls = getattr(agent, "env_cls", SimpleTradingEnv)
     rows = []
     for i in range(n_test):
-        env = env_cls(make_prices(market, n_steps, offset + i))
+        env = SimpleTradingEnv(make_prices(market, n_steps, offset + i))
         _, balances, actions, positions = run_episode(env, agent, greedy)
         rows.append(episode_metrics(balances, actions, positions))
     return pd.DataFrame(rows)

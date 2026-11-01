@@ -1,6 +1,7 @@
 """Pruebas del código común. Desde la raíz: python -m unittest discover -s notebooks/common -t notebooks"""
 
 import ast
+import copy
 import json
 import tempfile
 import unittest
@@ -12,10 +13,10 @@ import pandas as pd
 import torch
 
 from common import env as env_module
-from common import markets, protocol, tuning
+from common import dqn, markets, protocol, tuning
 from common.agents import (BUY, HOLD, SELL, BuyHoldAgent, NoTradeAgent, RandomAgent, ReversionRuleAgent,
                            TrendRuleAgent, baseline_agents)
-from common.dqn import DQNAgent, DQNConfig, entrena_y_evalua
+from common.dqn import DQNAgent, DQNConfig, EnsembleAgent, entrena_y_evalua, train_dqn
 from common.env import SimpleTradingEnv
 from common.markets import load_sp500, make_prices
 
@@ -230,6 +231,84 @@ class TestDQN(unittest.TestCase):
         self.assertEqual(len(first["curva"]["retorno"]), 3)
         np.testing.assert_array_equal(first["curva"]["val_episodios"], [0, 2, 3])
         np.testing.assert_array_equal(first["curva"]["retorno"], second["curva"]["retorno"])
+
+
+class TestMejorasDQN(unittest.TestCase):
+    def agent(self, **kwargs):
+        return DQNAgent(DQNConfig(memory_size=50, hidden=8, **kwargs), seed=0, scales=(1.0, 1.0))
+
+    def fijar(self, net, valores):
+        with torch.no_grad():
+            for p in net.parameters():
+                p.zero_()
+            net[2].bias[:] = torch.tensor(valores)
+
+    def test_sin_mejoras_el_objetivo_es_el_maximo(self):
+        agent = self.agent(gamma=1.0)
+        self.fijar(agent.q_target, [5.0, 1.0, 2.0])
+        y = agent.targets(torch.tensor([0.0]), torch.tensor([[0.0, 0.0]]), torch.tensor([0.0]))
+        self.assertAlmostEqual(y.item(), 5.0)
+
+    def test_doble_dqn_elige_con_una_red_y_valora_con_la_otra(self):
+        agent = self.agent(gamma=1.0, double_canonical=True)
+        self.fijar(agent.q, [0.0, 0.0, 9.0])  # la red que aprende elige comprar...
+        self.fijar(agent.q_target, [5.0, 1.0, 2.0])  # ...y la objetivo le da 2, no su máximo de 5
+        y = agent.targets(torch.tensor([0.0]), torch.tensor([[0.0, 0.0]]), torch.tensor([0.0]))
+        self.assertAlmostEqual(y.item(), 2.0)
+
+    def test_la_accion_que_no_hace_nada_cuenta_como_mantener(self):
+        agent = self.agent(gamma=1.0, double_canonical=True)
+        self.fijar(agent.q, [5.0, 1.0, 2.0])
+        self.fijar(agent.q_target, [5.0, 1.0, 2.0])
+        y = agent.targets(torch.zeros(2), torch.tensor([[0.0, 0.0], [0.0, 1.0]]), torch.zeros(2))
+        self.assertEqual(y.tolist(), [2.0, 5.0])  # sin activo no cuenta vender; con activo no cuenta comprar
+        self.assertEqual(agent.act(np.array([0.0, 0.0], dtype=np.float32), greedy=True), BUY)
+        agent.remember(np.array([0.0, 0.0]), SELL, 0.0, np.zeros(2), False)
+        self.assertEqual(agent.a[0], HOLD)
+        agent.remember(np.array([0.0, 1.0]), SELL, 0.0, np.zeros(2), False)
+        self.assertEqual(agent.a[1], SELL)
+
+    def test_recompensa_log_es_el_cambio_del_capital(self):
+        """Con el activo en cartera y sin operar, lo aprendido es el log del retorno del precio, no el retorno simple."""
+        cfg = DQNConfig(log_reward=True, n_episodes=1, min_memory=10_000, memory_size=600, n_eval=1, eval_every=1, hidden=8)
+        agent, _, _ = train_dqn(cfg, "browniano", seed=0, n_steps=60)
+        prices = make_prices("browniano", 60, protocol.train_series_seed(0, 0))
+        self.assertEqual(agent.size, 54)
+        held = [i for i in range(agent.size) if agent.s[i, 1] == 1 and agent.s2[i, 1] == 1]
+        self.assertGreater(len(held), 0)
+        for i in held:
+            self.assertAlmostEqual(float(agent.r[i]) * agent.scale_reward, np.log(prices[6 + i] / prices[5 + i]), places=5)
+
+    def test_elige_el_mejor_punto_y_no_el_ultimo(self):
+        agent = self.agent()
+        estados = []
+        for v in (0.0, 1.0, 2.0):
+            self.fijar(agent.q, [v, 0.0, 0.0])
+            estados.append(copy.deepcopy(agent.q.state_dict()))
+        marcas = iter([0.1, 0.5, 0.2])
+
+        def falso(*a, **k):
+            return pd.DataFrame({"retorno": [next(marcas)]})
+
+        with mock.patch("common.dqn.evaluate", falso):
+            episodio = dqn.select_checkpoint(agent, "browniano", [(0.3, 0, estados[0]), (0.9, 25, estados[1]), (0.0, 50, estados[2])], 2)
+        self.assertEqual(episodio, 25)
+        self.assertEqual(agent.q[2].bias[0].item(), 1.0)
+
+    def test_conjunto_promedia_la_q(self):
+        a, b = self.agent(), self.agent()
+        self.fijar(a.q, [3.0, 0.0, 0.0])
+        self.fijar(b.q, [0.0, 0.0, 2.0])
+        self.assertEqual(EnsembleAgent([a, b]).act(np.zeros(2, dtype=np.float32)), SELL)
+        self.fijar(b.q, [0.0, 0.0, 4.0])
+        self.assertEqual(EnsembleAgent([a, b]).act(np.zeros(2, dtype=np.float32)), BUY)
+
+    def test_ventaja_emparejada(self):
+        base = [np.array([0.0, 0.0, 0.0])] * 3
+        mejor = [np.exp([0.1, 0.1, 0.1]) - 1, np.exp([0.2, 0.2, 0.2]) - 1, np.exp([-0.1, -0.1, -0.1]) - 1]
+        ventaja, ganan = tuning.ventaja_emparejada(mejor, base)
+        self.assertAlmostEqual(ventaja, 0.1)
+        self.assertEqual(ganan, 2)
 
 
 class TestResultados(unittest.TestCase):
