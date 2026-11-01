@@ -12,7 +12,7 @@ import pandas as pd
 import torch
 
 from common import env as env_module
-from common import markets, protocol
+from common import markets, protocol, tuning
 from common.agents import (BUY, HOLD, SELL, BuyHoldAgent, NoTradeAgent, RandomAgent, ReversionRuleAgent,
                            TrendRuleAgent, baseline_agents)
 from common.dqn import DQNAgent, DQNConfig, entrena_y_evalua
@@ -119,7 +119,26 @@ class TestConvergencia(unittest.TestCase):
         self.assertEqual((episode, steps, seconds), (75, 75 * 494, 6.0))
 
     def test_sin_operar_no_hay_convergencia(self):
-        self.assertTrue(np.isnan(protocol.greedy_convergence(self.history([0.0] * 5, trades=0.0), 494)[0]))
+        history = self.history([0.0] * 5, trades=0.0)
+        self.assertTrue(np.isnan(protocol.greedy_convergence(history, 494)[0]))
+        self.assertEqual(protocol.convergence_status(history), "no opera")
+
+    def test_si_no_mejora_no_hay_convergencia(self):
+        """Antes devolvía el episodio 0, que parecía una convergencia instantánea."""
+        history = self.history([0.1, -0.05, -0.08, -0.1, -0.1])
+        self.assertTrue(np.isnan(protocol.greedy_convergence(history, 494)[0]))
+        self.assertEqual(protocol.convergence_status(history), "no mejora")
+
+    def test_nunca_converge_en_el_punto_inicial(self):
+        episode, _, _ = protocol.greedy_convergence(self.history([0.0, 1.0, 1.0, 1.0, 1.0]), 494)
+        self.assertEqual(episode, 25)
+
+    def test_recalcula_la_convergencia_desde_las_curvas(self):
+        curves = {"a": self.history([0.1, -0.05, -0.08, -0.1, -0.1]), "b": self.history([0.0, 1.0, 1.0, 1.0, 1.0])}
+        df = protocol.recompute_convergence(pd.DataFrame({"id": ["a", "b"], "episodios_convergencia": [0, 3]}), curves)
+        self.assertTrue(np.isnan(df.episodios_convergencia[0]))
+        self.assertEqual(df.episodios_convergencia[1], 25)
+        self.assertEqual(df.estado_convergencia.tolist(), ["no mejora", "converge"])
 
     def test_agrega_semillas_en_una_fila(self):
         rows = [dict.fromkeys(protocol.RESULT_COLUMNS, 1.0) | {"agente": "dqn", "mercado": "browniano",
@@ -253,6 +272,15 @@ class TestResultados(unittest.TestCase):
 
     def test_la_version_invalida_la_cache(self):
         self.assertNotEqual(protocol.config_id({"x": 1}, 1), protocol.config_id({"x": 1}, 2))
+
+
+class TestAjuste(unittest.TestCase):
+    def test_margen_de_ruido(self):
+        self.assertTrue(tuning.mejora_de_verdad("tendencia_ciclo", 700.0, 500.0))
+        self.assertFalse(tuning.mejora_de_verdad("tendencia_ciclo", 600.0, 500.0))
+        self.assertTrue(tuning.mejora_de_verdad("reversion_media", 0.33, 0.30))
+        self.assertFalse(tuning.mejora_de_verdad("browniano", 0.05, 0.0))
+        self.assertAlmostEqual(tuning.margen_log("tendencia_ciclo"), np.log(1.25))
 
 
 class TestDatos(unittest.TestCase):

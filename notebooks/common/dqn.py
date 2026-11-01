@@ -12,13 +12,11 @@ import numpy as np
 import torch
 from torch import nn
 
-from .agents import BUY, HOLD, N_ACTIONS, OBS_DIM, SELL
+from .agents import BUY, HOLD, N_ACTIONS, OBS_DIM, SELL, policy_string
 from .env import SimpleTradingEnv
 from .markets import make_prices
 from .protocol import (N_STEPS, RESULTS_DIR, convergence_episode, evaluate, greedy_convergence, set_seed, summarize,
                        train_scales, train_series_seed)
-
-ACTION_LETTERS = {SELL: "V", HOLD: "M", BUY: "C"}
 
 
 @dataclass
@@ -65,6 +63,10 @@ class DQNAgent:
         self.size = 0
         self.position = 0
         self.steps = 0
+
+    def neutral_obs(self, position):
+        """Observación real con tendencia 0 y `position`."""
+        return [0.0, float(position)]
 
     def _scale_obs(self, obs):
         scaled = np.asarray(obs, dtype=np.float32).copy()
@@ -140,12 +142,6 @@ class DQNAgent:
         agent.q.load_state_dict(data["state"])
         agent.epsilon = 0.0
         return agent
-
-
-def policy_string(agent, position, n=11, k_max=2.5):
-    """Acción greedy sobre una rejilla de tendencias entre ±`k_max` σ: 'V', 'M' o 'C' por punto."""
-    trends = np.linspace(-k_max, k_max, n) * agent.scales[0]
-    return "".join(ACTION_LETTERS[agent.act(np.array([t, position], dtype=np.float32), greedy=True)] for t in trends)
 
 
 def train_dqn(cfg, market, seed=0, n_steps=N_STEPS):

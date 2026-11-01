@@ -95,6 +95,10 @@ Formato ligero tipo ADR, como en el Taller 1. ID `D-X.n`: `X` es el bloque (0 ge
   tres variantes con algún cambio se solapan (x576-x596), y en el browniano ninguna obtiene ganancia real.
 - **Límite:** con 3 semillas, "las dos" no queda demostrada frente a "solo recompensa", y ninguna alcanza a la regla de
   referencia en reversión (+31,5 %). Hay que confirmarlo con el DQN definitivo, y probarlo en A3C.
+- **Confirmación con el DQN definitivo (`01_dqn`, §3; 3 semillas, 500 episodios, validación):** en reversión a la media, sin
+  nada +2,3 % con 3,3 operaciones, solo recompensa +28,8 %, solo observación +29,3 % (con una semilla en +1,8 %) y las dos
+  +31,4 %. En el mercado 1, x370, x529, x597 y x505. Normalizar es necesario, pero "las dos" no se distingue de cada una por
+  separado salvo por no tener semillas malas. Pendiente de probar en A3C (`02_a3c`).
 - **Estado:** CERRADA
 
 ### D-1.2 · Fin del episodio
@@ -110,6 +114,43 @@ Formato ligero tipo ADR, como en el Taller 1. ID `D-X.n`: `X` es el bloque (0 ge
   más simple, coincide con el Taller 1 y mantiene la comparación con sus tabulares. Afecta a 1 de 494 pasos.
 - **Límite:** es una simplificación, porque la serie se corta por tiempo y la observación no incluye cuánto queda. Si
   el agente se comporta de forma rara al final del episodio, hay que revisarla.
+- **Estado:** CERRADA
+
+### D-2.2 · Diseño del DQN
+
+- **Fecha:** 2026-11-01
+- **Decisión:** entrada `[tendencia / σ, posición]`, red 2 → 64 ReLU → 3 lineales, MSE y Adam, memoria circular de 20 000
+  transiciones (unos 40 episodios) que empieza a entrenar con 1 000, minibatch de 128, un paso de gradiente cada 4 de entorno
+  y copia a la red objetivo cada 500 pasos. ε parte de 1 y decae por episodio.
+- **Justificación:** valores de clase (`2-cart_pole_DQN`) salvo la red, que el profesor pide lo más simple posible. Entrenar cada
+  4 pasos cuesta un tercio que hacerlo en cada paso (`00_entorno_y_baselines`, §7). El agente usa su propio generador aleatorio
+  porque `make_prices` reinicia el de NumPy con cada serie.
+- **Límite:** la memoria, la frecuencia de entrenamiento y el tamaño de la red no se ajustaron en el 01. La red objetivo no
+  demostró ayudar ni perjudicar (x505 frente a x410 y +31,4 % frente a +30,8 %, dentro del ruido). ε acaba en 0,08 con 500
+  episodios, sin llegar al mínimo de 0,01.
+- **Estado:** CERRADA
+
+### D-2.3 · Ajuste por etapas con margen de ruido
+
+- **Fecha:** 2026-11-01
+- **Decisión:** un parámetro cada vez y por mercado (red objetivo, α, γ, ε, episodios), en las 100 series de validación con 3
+  semillas. Un valor nuevo solo sustituye al actual si mejora más que el ruido: 10 puntos en los mercados 2 y 4, 2 puntos en el 3
+  y un 25 % del múltiplo en el 1 (unos 2 errores estándar de la mediana con 100 series, `00_entorno_y_baselines`, §5).
+- **Justificación:** sin margen, en los mercados sin señal se elegiría el azar más favorable.
+- **Resultado en DQN:** ningún cambio supera el margen, así que los 4 mercados se quedan con la configuración de partida. Esto no
+  prueba que sea óptima.
+- **Límite:** las etapas no ven interacciones (ε y episodios lo están) y 3 semillas sobrestimaron el mercado 3 (+31,4 % frente a
+  +27,7 % con 5 semillas, en las mismas series).
+- **Estado:** CERRADA
+
+### D-2.4 · El test ya visto no se vuelve a usar para elegir
+
+- **Fecha:** 2026-11-01
+- **Contexto:** D-0.1 dice que el test se usa una sola vez, y el resultado de DQN ya se ha visto. Interesa mejorar el agente.
+- **Decisión:** `results/01_dqn.csv` es el resultado de referencia y no se sobrescribe. Toda mejora se elige solo en validación y
+  va en filas aparte (`dqn_mejorado`, `dqn_estado`, notebook 03), que se evalúan una vez en el mismo test, para compararlas con el
+  Taller 1, y otra en 400 series que no se han usado para nada (`split="nuevas"`, semillas desde 400 000). El informe debe decir
+  que ese test ya se había visto.
 - **Estado:** CERRADA
 
 ### D-2.1 · Variante de A3C

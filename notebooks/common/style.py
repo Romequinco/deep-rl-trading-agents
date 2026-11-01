@@ -4,6 +4,7 @@ Uso: `from common.style import setup, AGENT_COLORS, MARKET_LABELS, savefig` y `s
 """
 
 import matplotlib.pyplot as plt
+from matplotlib import ticker
 import numpy as np
 import pandas as pd
 
@@ -19,6 +20,8 @@ AGENT_COLORS = {
     "sarsa": "#2F9E6E",
     "dqn": "#6C5CE7",
     "a3c": "#D63031",
+    "dqn_mejorado": "#3B2FB5",
+    "dqn_estado": "#A29BFE",
 }
 MARKET_COLORS = {
     "tendencia_ciclo": "#6C5CE7",
@@ -33,6 +36,20 @@ MARKET_LABELS = {
     "regimenes": "4 · Regímenes",
 }
 POSITION_COLORS = {1: "#2F9E6E", 0: "#D63031"}  # con activo / sin activo, como en el taller
+
+
+def formato(r):
+    """Retorno legible: múltiplo del capital a partir de x2 y porcentaje por debajo."""
+    return f"x{1 + r:.1f}" if r >= 1 else f"{r:+.1%}"
+
+
+def log_axis(ax, axis="y"):
+    """Escala logarítmica con marcas legibles, también cuando el rango es menor que una década."""
+    getattr(ax, f"set_{axis}scale")("log")
+    target = getattr(ax, f"{axis}axis")
+    target.set_major_locator(ticker.LogLocator(base=10, subs=(1, 1.5, 2, 3, 5, 7), numticks=20))
+    target.set_major_formatter(ticker.FuncFormatter(lambda v, _: f"{v:g}"))
+    target.set_minor_formatter(ticker.NullFormatter())
 
 
 def setup():

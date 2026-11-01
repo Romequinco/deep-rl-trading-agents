@@ -58,6 +58,19 @@ class ReversionRuleAgent(TrendRuleAgent):
         return SELL if obs[0] > self.threshold else HOLD
 
 
+def policy_string(agent, position, n=11, k_max=2.5):
+    """Acción greedy sobre una rejilla de tendencias entre ±`k_max` σ: 'V', 'M' o 'C' por punto. Las entradas
+    añadidas al estado, si las hay, se fijan en su valor medio."""
+    letters = {SELL: "V", HOLD: "M", BUY: "C"}
+    base = np.array(agent.neutral_obs(position), dtype=np.float32)
+    out = []
+    for t in np.linspace(-k_max, k_max, n) * agent.scales[0]:
+        obs = base.copy()
+        obs[0] = t
+        out.append(letters[agent.act(obs, greedy=True)])
+    return "".join(out)
+
+
 RULES = {"regla_tendencia": TrendRuleAgent, "regla_reversion": ReversionRuleAgent}
 
 

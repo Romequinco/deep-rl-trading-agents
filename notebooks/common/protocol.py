@@ -28,6 +28,8 @@ N_SEEDS_FINAL = 5
 TEST_SEED_OFFSET = 100_000
 VAL_SEED_OFFSET = 50_000
 TRAIN_SEED_STRIDE = 10_000
+FRESH_SEED_OFFSET = 400_000
+N_FRESH = 400
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / "results"
 RESULT_COLUMNS = ["agente", "mercado", "retorno_mediana", "retorno_medio", "std", "sharpe", "max_drawdown",
@@ -94,12 +96,16 @@ def episode_metrics(balances, actions, positions):
 
 
 def evaluate(agent, market, n_test=None, n_steps=N_STEPS, greedy=True, split="test"):
-    """Evalúa sin aprender sobre series de `split` ("test" o "val"). Devuelve un DataFrame (una fila por serie)."""
-    offset = {"test": TEST_SEED_OFFSET, "val": VAL_SEED_OFFSET}[split]
-    n_test = n_test or {"test": N_TEST, "val": N_VAL}[split]
+    """Evalúa sin aprender sobre series de `split` ("test", "val" o "nuevas"). Devuelve un DataFrame (una fila por serie).
+
+    "nuevas" son series que no se han usado para nada: sirven para evaluar lo que se elige después de haber visto el test.
+    """
+    offset = {"test": TEST_SEED_OFFSET, "val": VAL_SEED_OFFSET, "nuevas": FRESH_SEED_OFFSET}[split]
+    n_test = n_test or {"test": N_TEST, "val": N_VAL, "nuevas": N_FRESH}[split]
+    env_cls = getattr(agent, "env_cls", SimpleTradingEnv)
     rows = []
     for i in range(n_test):
-        env = SimpleTradingEnv(make_prices(market, n_steps, offset + i))
+        env = env_cls(make_prices(market, n_steps, offset + i))
         _, balances, actions, positions = run_episode(env, agent, greedy)
         rows.append(episode_metrics(balances, actions, positions))
     return pd.DataFrame(rows)
@@ -119,22 +125,41 @@ def convergence_episode(rewards, window=50, frac=0.9):
     return int(np.argmax(reached) + window - 1)
 
 
+def convergence_status(history):
+    """Por qué hay o no hay convergencia (D-0.3): "no opera", "no mejora" o "converge"."""
+    if history["val_trades"][-1] < 1:
+        return "no opera"
+    y = np.log1p(np.maximum(history["val_retorno"], -0.999))
+    smooth = pd.Series(y).rolling(3, center=True, min_periods=1).median().to_numpy()
+    return "converge" if smooth[-1] > y[0] else "no mejora"
+
+
 def greedy_convergence(history, steps_per_episode, frac=0.9, window=3):
-    """Convergencia de D-0.3, sobre la curva sin exploración: primer punto que recorre `frac` del camino entre su
-    valor inicial y el final. Devuelve (episodio, pasos de entorno, segundos), o NaN si el agente acaba sin operar.
+    """Convergencia de D-0.3, sobre la curva sin exploración: primer punto, después del inicial, que recorre `frac` del
+    camino entre su valor inicial y el final. Devuelve (episodio, pasos de entorno, segundos), o NaN si el agente acaba
+    sin operar o no mejora: en ninguno de los dos casos hay nada que haya convergido.
 
     Se mide en log(1 + retorno) para que el mercado 1 no dependa de la escala, con una mediana móvil de `window`
     puntos, porque cada punto usa pocas series.
     """
-    if history["val_trades"][-1] < 1:
+    if convergence_status(history) != "converge":
         return np.nan, np.nan, np.nan
     y = np.log1p(np.maximum(history["val_retorno"], -0.999))
     smooth = pd.Series(y).rolling(window, center=True, min_periods=1).median().to_numpy()
     start, end = y[0], smooth[-1]
     target = start + frac * (end - start)
-    i = int(np.argmax(smooth >= target if end >= start else smooth <= target))
+    i = 1 + int(np.argmax(smooth[1:] >= target))
     episode = int(history["val_episodios"][i])
     return episode, episode * steps_per_episode, float(history["val_tiempo"][i])
+
+
+def recompute_convergence(df, curves, steps_per_episode=N_STEPS - 6):
+    """Recalcula las columnas de convergencia de un barrido a partir de sus curvas, sin reentrenar."""
+    df = df.copy()
+    values = [greedy_convergence(curves[i], steps_per_episode) for i in df["id"]]
+    df[["episodios_convergencia", "pasos_convergencia", "tiempo_convergencia_s"]] = values
+    df["estado_convergencia"] = [convergence_status(curves[i]) for i in df["id"]]
+    return df
 
 
 def aggregate_seeds(rows):
