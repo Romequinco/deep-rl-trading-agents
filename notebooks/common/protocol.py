@@ -12,7 +12,7 @@ import json
 import os
 import pickle
 import random
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 import numpy as np
@@ -119,6 +119,34 @@ def convergence_episode(rewards, window=50, frac=0.9):
     return int(np.argmax(reached) + window - 1)
 
 
+def greedy_convergence(history, steps_per_episode, frac=0.9, window=3):
+    """Convergencia de D-0.3, sobre la curva sin exploración: primer punto que recorre `frac` del camino entre su
+    valor inicial y el final. Devuelve (episodio, pasos de entorno, segundos), o NaN si el agente acaba sin operar.
+
+    Se mide en log(1 + retorno) para que el mercado 1 no dependa de la escala, con una mediana móvil de `window`
+    puntos, porque cada punto usa pocas series.
+    """
+    if history["val_trades"][-1] < 1:
+        return np.nan, np.nan, np.nan
+    y = np.log1p(np.maximum(history["val_retorno"], -0.999))
+    smooth = pd.Series(y).rolling(window, center=True, min_periods=1).median().to_numpy()
+    start, end = y[0], smooth[-1]
+    target = start + frac * (end - start)
+    i = int(np.argmax(smooth >= target if end >= start else smooth <= target))
+    episode = int(history["val_episodios"][i])
+    return episode, episode * steps_per_episode, float(history["val_tiempo"][i])
+
+
+def aggregate_seeds(rows):
+    """Una fila por agente y mercado con la mediana de cada métrica entre semillas (es lo que lee el 04).
+
+    El detalle por semilla se guarda aparte, en un fichero con `_grid_` en el nombre para que `load_results` no lo lea.
+    """
+    df = pd.DataFrame(rows)
+    numeric = [c for c in RESULT_COLUMNS if c not in ("agente", "mercado")]
+    return df.groupby(["agente", "mercado"], sort=False)[numeric].median().reset_index()[RESULT_COLUMNS]
+
+
 def summarize(agent_name, market, test_df, rewards=None, train_time=0.0):
     """Fila resumen con el esquema común `RESULT_COLUMNS`."""
     return {
@@ -184,15 +212,22 @@ def run_grid(configs, fn, name, version=1, n_jobs=None, recompute=False):
     if todo:
         n_jobs = n_jobs or max(1, (os.cpu_count() or 2) - 1)
         print(f"Entrenando {len(todo)} configuraciones en {n_jobs} procesos ({len(configs) - len(todo)} en caché)...")
-        cfgs = [c for _, c in todo]
+
+        def store(cid, out):
+            # Cada resultado se guarda al terminar y de forma atómica: un corte solo pierde lo que estaba en marcha
+            tmp = cache / f"{cid}.tmp"
+            tmp.write_bytes(pickle.dumps(out))
+            tmp.replace(cache / f"{cid}.pkl")
+            done[cid] = out
+
         if n_jobs == 1:
-            outputs = [fn(c) for c in cfgs]
+            for cid, c in todo:
+                store(cid, fn(c))
         else:
             with ProcessPoolExecutor(max_workers=n_jobs) as pool:
-                outputs = list(pool.map(fn, cfgs))
-        for (cid, _), out in zip(todo, outputs):
-            (cache / f"{cid}.pkl").write_bytes(pickle.dumps(out))
-            done[cid] = out
+                futures = {pool.submit(fn, c): cid for cid, c in todo}
+                for future in as_completed(futures):
+                    store(futures[future], future.result())
     df = pd.DataFrame([{**c, **done[cid]["fila"], "id": cid} for cid, c in zip(ids, configs)])
     df.to_csv(RESULTS_DIR / f"{name}.csv", index=False)
     return df, {cid: done[cid]["curva"] for cid in ids}
