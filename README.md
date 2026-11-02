@@ -20,7 +20,7 @@ Continúa el Taller 1, con Q-Learning y SARSA tabulares:
   3. Ajuste de α, ε (con decaimiento), γ y número de episodios.
   4. Tabla comparativa de rendimiento y tiempo de convergencia.
 - **Entrega:** PDF de **2 páginas como máximo** (pruebas, resultados y conclusiones), una por grupo.
-  - Antes del **martes 3/11:** un representante manda un email al profesor para fijar el orden de presentación.
+  - Antes del **martes 3/11:** un representante manda un email al profesor para fijar el orden de presentación. **Enviado el 2/11.**
   - Antes de la clase del **jueves 5/11:** primera versión por email.
   - **5/11, en clase:** presentación y discusión de 15 minutos.
   - **5/11, 23:59:** entrega final.
@@ -145,6 +145,7 @@ ruido (D-2.5); la más prometedora es quedarse con el mejor punto en validación
 - [x] 00 Entorno y baselines
 - [x] Documentación de teoría (`docs/teoria/`)
 - [x] 01 DQN
+- [x] Email al profesor (orden de presentación y dónde se entrega)
 - [ ] 02 A3C
 - [ ] 03 Extras
 - [ ] 04 Comparativa

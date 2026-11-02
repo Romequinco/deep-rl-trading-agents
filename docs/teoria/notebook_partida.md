@@ -411,7 +411,7 @@ Convergencia del duelo con la misma configuración (T1:D-2.5). Otros datos del T
 
 | Rúbrica | Comprobación | Dónde |
 |---|---|---|
-| Logística | Email del representante enviado **antes del 3/11**, preguntando también dónde se sube la versión final | Dirección en la celda 23 |
+| Logística | ✅ Email del representante enviado **antes del 3/11** (2/11), preguntando también dónde se sube la versión final | Dirección en la celda 23 |
 | Logística | Primera versión enviada **antes de la clase del 5/11** | `results/informe.md` → PDF |
 | Logística | PDF final de **2 páginas como máximo**, una entrega por grupo, **5/11, 23:59** | `build_informe.py` · D-0.5 |
 | Mínimos (50 %) | DQN y A3C entrenados en los 4 mercados, con una serie nueva por episodio | 01, 02 · D-0.1 |
@@ -435,7 +435,7 @@ Convergencia del duelo con la misma configuración (T1:D-2.5). Otros datos del T
 
 **Nota: propuesta de plan.** Todo lo anterior se reduce a estos pasos:
 
-1. **Hoy:** email del representante; quien asistiera el 31/10 contrasta §3.5 con lo que se dijo.
+1. **Hecho (2/11):** email del representante enviado; quien asistiera el 31/10 contrasta §3.5 con lo que se dijo.
 2. **D-1.1 y D-1.2 ya están cerradas.** Empezad con la observación normalizada por mercado y validad el código en el mercado 1: tiene la señal más fuerte (§5.2), y el resultado del Taller 1 (x502) dice qué esperar.
 3. **DQN y A3C primero en mercados 1 y 3,** que son los que tienen señal. En 2 y 4 el resultado esperable es no operar o quedarse dentro: si el agente opera mucho, sospechad antes que celebrar.
 4. **Medir siempre la política *greedy* en validación,** con 494 decisiones por episodio, y comparar con `no_operar`, buy & hold y `results/taller1_tabular.csv`.
