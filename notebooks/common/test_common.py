@@ -13,7 +13,7 @@ import pandas as pd
 import torch
 
 from common import env as env_module
-from common import dqn, markets, protocol, tuning
+from common import a3c, dqn, markets, protocol, tuning
 from common.agents import (BUY, HOLD, SELL, BuyHoldAgent, NoTradeAgent, RandomAgent, ReversionRuleAgent,
                            TrendRuleAgent, baseline_agents)
 from common.dqn import DQNAgent, DQNConfig, EnsembleAgent, entrena_y_evalua, train_dqn
@@ -309,6 +309,97 @@ class TestMejorasDQN(unittest.TestCase):
         ventaja, ganan = tuning.ventaja_emparejada(mejor, base)
         self.assertAlmostEqual(ventaja, 0.1)
         self.assertEqual(ganan, 2)
+
+
+class TestA3C(unittest.TestCase):
+    def agent(self, **kwargs):
+        return a3c.A3CAgent(a3c.A3CConfig(hidden=8, **kwargs), seed=0, scales=(0.5, 0.02))
+
+    def test_retorno_de_n_pasos_con_bootstrap(self):
+        np.testing.assert_allclose(a3c.n_step_returns([1.0, 2.0], 0.5, 8.0), [1 + 0.5 * 2 + 0.25 * 8, 2 + 0.5 * 8])
+
+    def test_retorno_terminal_parte_de_cero(self):
+        np.testing.assert_allclose(a3c.n_step_returns([1.0, 2.0], 0.5, 0.0), [2.0, 2.0])
+
+    def test_la_ventaja_no_entrena_al_critico_por_el_actor(self):
+        agent = self.agent(value_coef=0.0, entropy_coef=0.0)
+        logits, values = agent.net(torch.tensor([[0.1, 0.0], [-0.2, 1.0]]))
+        loss, _ = a3c.a3c_loss(logits, values, torch.tensor([2, 0]), torch.tensor([1.0, -1.0]), agent.cfg)
+        loss.backward()
+        self.assertEqual(agent.net.v.weight.grad.abs().sum().item(), 0)
+        self.assertGreater(agent.net.pi.weight.grad.abs().sum().item(), 0)
+
+    def test_la_mascara_quita_la_accion_que_no_hace_nada(self):
+        agent = self.agent(mask_redundant=True)
+        for trend in (-1.0, 0.0, 1.0):
+            self.assertEqual(agent.probs([trend, 0.0])[SELL], 0)
+            self.assertEqual(agent.probs([trend, 1.0])[BUY], 0)
+            self.assertAlmostEqual(float(agent.probs([trend, 0.0]).sum()), 1, places=5)
+
+    def test_la_entropia_con_mascara_no_da_nan(self):
+        agent = self.agent(mask_redundant=True)
+        x = torch.tensor([[0.1, 0.0], [-0.2, 1.0]])
+        logits, values = agent.net(x)
+        logits = a3c.mask_logits(logits, x[:, 1], True)
+        loss, entropy = a3c.a3c_loss(logits, values, torch.tensor([2, 0]), torch.tensor([1.0, -1.0]), agent.cfg)
+        loss.backward()
+        self.assertTrue(torch.isfinite(loss))
+        self.assertLessEqual(entropy.item(), float(np.log(2)) + 1e-6)
+        self.assertTrue(all(torch.isfinite(p.grad).all() for p in agent.net.parameters()))
+
+    def test_escala_la_observacion_y_no_el_entorno(self):
+        agent = self.agent()
+        np.testing.assert_allclose(agent._scale_obs([0.25, 1.0]), [0.5, 1.0])
+
+    def test_greedy_es_determinista_y_no_usa_el_generador(self):
+        agent = self.agent()
+        state = agent.rng.get_state().clone()
+        actions = {agent.act([0.1, 0.0], greedy=True) for _ in range(5)}
+        self.assertEqual(len(actions), 1)
+        self.assertTrue(torch.equal(agent.rng.get_state(), state))
+
+    def test_optimizador_compartido_sin_mover_los_pesos(self):
+        agent = self.agent()
+        before = copy.deepcopy(agent.net.state_dict())
+        agent.net.share_memory()
+        optimizer = a3c.make_shared_optimizer(agent.net, 1e-3)
+        for k, v in agent.net.state_dict().items():
+            torch.testing.assert_close(v, before[k])
+        self.assertTrue(all(v.is_shared() for s in optimizer.state.values() for v in s.values() if torch.is_tensor(v)))
+
+    def test_guardar_y_cargar_conserva_la_politica(self):
+        agent = self.agent()
+        with tempfile.TemporaryDirectory() as tmp, mock.patch("common.a3c.RESULTS_DIR", Path(tmp)):
+            agent.save("prueba")
+            loaded = a3c.A3CAgent.load("prueba")
+        np.testing.assert_array_equal(agent.probs([0.1, 1.0]), loaded.probs([0.1, 1.0]))
+        self.assertEqual(loaded.scales, agent.scales)
+
+    def test_entrenamiento_real_con_procesos(self):
+        cfg = a3c.A3CConfig(n_episodes=6, n_workers=2, eval_every=4, n_eval=2, hidden=8, t_max=5)
+        start = 8  # se redondea hacia arriba a tramos completos entre evaluaciones
+        agent, history, seconds = a3c.train_a3c(cfg, "browniano", seed=1, n_steps=60)
+        self.assertEqual(len(history["retorno"]), start)
+        self.assertFalse(np.isnan(history["retorno"]).any())  # todos los episodios de los dos procesos
+        self.assertEqual(history["val_episodios"][0], 0)
+        self.assertEqual(history["val_episodios"][-1], start)
+        self.assertGreater(seconds, 0)
+        self.assertEqual(protocol.evaluate(agent, "browniano", n_test=1, n_steps=60).shape[0], 1)
+
+    def test_los_procesos_cambian_los_pesos_compartidos(self):
+        protocol.set_seed(3)
+        fresh = a3c.A3CAgent(a3c.A3CConfig(hidden=8), seed=3)
+        cfg = a3c.A3CConfig(n_episodes=4, n_workers=2, eval_every=4, n_eval=1, hidden=8, t_max=5)
+        trained, _, _ = a3c.train_a3c(cfg, "browniano", seed=3, n_steps=60)
+        self.assertFalse(torch.equal(fresh.net.common.weight, trained.net.common.weight))
+
+    def test_elige_el_mejor_punto_y_no_el_ultimo(self):
+        cfg = a3c.A3CConfig(n_episodes=4, n_workers=2, eval_every=2, n_eval=1, hidden=8, t_max=5, best_checkpoint=True)
+        agent = a3c.A3CAgent(cfg, seed=0, scales=protocol.train_scales("browniano"))
+        states = [{k: v.clone() for k, v in agent.net.state_dict().items()} for _ in range(3)]
+        with mock.patch("common.a3c.evaluate", side_effect=[pd.DataFrame({"retorno": [r]}) for r in (0.1, 0.5, 0.2)]):
+            chosen = a3c.select_checkpoint(agent, "browniano", [(0.0, 0, states[0]), (0.1, 2, states[1]), (0.2, 4, states[2])])
+        self.assertEqual(chosen, 2)
 
 
 class TestResultados(unittest.TestCase):

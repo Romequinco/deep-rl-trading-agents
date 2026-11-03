@@ -43,7 +43,7 @@ Continúa el Taller 1, con Q-Learning y SARSA tabulares:
 │       ├── agents.py             # referencias: aleatorio, buy & hold, no operar y reglas simples
 │       ├── protocol.py           # series, evaluate(), métricas, save_results(), run_grid()
 │       ├── dqn.py                # DQN y sus opciones de mejora
-│       ├── a3c.py                # A3C (interfaz por implementar)
+│       ├── a3c.py                # A3C con procesos asíncronos
 │       ├── tuning.py             # ajuste por etapas y margen de ruido
 │       ├── style.py              # paleta y figuras comunes
 │       └── test_common.py
@@ -146,7 +146,7 @@ ruido (D-2.5); la más prometedora es quedarse con el mejor punto en validación
 - [x] Documentación de teoría (`docs/teoria/`)
 - [x] 01 DQN
 - [x] Email al profesor (orden de presentación y dónde se entrega)
-- [ ] 02 A3C
+- [x] 02 A3C
 - [ ] 03 Extras
 - [ ] 04 Comparativa
 - [ ] Informe PDF (`results/informe.pdf`, se regenera con `python results/build_informe.py`)
