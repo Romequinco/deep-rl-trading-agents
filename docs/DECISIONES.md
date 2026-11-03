@@ -175,4 +175,23 @@ Formato ligero tipo ADR, como en el Taller 1. ID `D-X.n`: `X` es el bloque (0 ge
   así que el ajuste de ε del enunciado se traslada al coeficiente de entropía y hay que justificarlo en el informe.
 - **Alternativas:** A3C real con procesos asíncronos, que no es reproducible bit a bit y da un tiempo sensible a la
   CPU; o A2C síncrono como comparación adicional.
-- **Estado:** ABIERTA
+- **Decisión:** A3C real, con 3 procesos asíncronos (`spawn`, necesario en Windows) que escriben sin cerrojos sobre pesos y
+  estado de Adam compartidos. No se añade A2C. El ajuste de ε se traslada a β, el coeficiente de entropía.
+- **Consecuencia:** no es reproducible bit a bit, así que se informa de la dispersión entre semillas. El tiempo solo se
+  compara con DQN medido en el mismo equipo (`02_a3c.ipynb`, §6).
+- **Estado:** CERRADA
+
+### D-2.6 · Diseño y ajuste del A3C
+
+- **Fecha:** 2026-11-03
+- **Decisión:** lo posible igual que DQN: entrada `[tendencia / σ, posición]`, 64 neuronas, recompensa normalizada y fin de
+  episodio terminal. `n_episodes` es el total entre procesos, para usar los mismos ≈247 000 pasos de entorno. Las series son
+  disjuntas entre procesos. Red con capa compartida, retornos de hasta `t_max` pasos, Adam compartido y recorte de la
+  norma del gradiente a 5. La tabla completa está en `02_a3c.ipynb`, §1.
+- **Ajuste (D-2.3):** base α = 0,001, γ = 0,9, β = 0,01, `t_max` = 20, 500 episodios y sin máscara de acciones redundantes.
+  Solo superan el margen α = 0,003 en el mercado 1 (x538,3 → x728,1) y β = 0 en el 3 (+21,0 % → +25,9 %). La máscara empeora
+  (x491,2 y +16,0 %) y queda desactivada.
+- **Resultado en test:** x374,9, −4,5 %, +13,8 % y 0 %. No bate a la mejor referencia en ningún mercado.
+- **Mejor punto (informativo, D-2.4):** en las 400 series nuevas, x480,3 y +30,1 % frente a x388,2 y +15,8 % de la base,
+  por encima del margen en los mercados 1 y 3. No se adopta: se midió después del test y el resultado oficial no cambia.
+- **Estado:** CERRADA

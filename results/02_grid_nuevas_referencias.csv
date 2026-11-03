@@ -1,0 +1,5 @@
+agente,mercado,umbral,split,retorno_mediana,retorno_medio,std,sharpe,max_drawdown,n_trades,episodios_convergencia,tiempo_s,id
+regla_tendencia,tendencia_ciclo,0.0763212963027653,nuevas,529.180471269615,4065.772189106984,12294.087252307945,0.20405773750463163,0.6055125170118388,40.7275,,0.0,8ea619e567d5dbcd
+no_operar,browniano,0.0,nuevas,0.0,0.0,0.0,0.0,0.0,0.0,,0.0,0aa08508771e35c1
+regla_reversion,reversion_media,0.036119179532115,nuevas,0.32665700713926404,0.3564234509288052,0.263493685103362,0.04828162847706055,0.18991383072154533,21.125,,0.0,ce719b68644c12a2
+no_operar,regimenes,0.0,nuevas,0.0,0.0,0.0,0.0,0.0,0.0,,0.0,55f2be3ab64c209d
