@@ -121,6 +121,18 @@ Mediana del retorno en las 200 series de test, con 5 semillas. Hiperparámetros:
 Bate a buy & hold donde hay señal, pero no a las reglas ni a los tabulares. Ninguna de las cuatro mejoras probadas supera el margen de
 ruido (D-2.5); la más prometedora es quedarse con el mejor punto en validación.
 
+## Experimentos adicionales (`03_extras`)
+
+El notebook 03 está ejecutado: 260 entrenamientos DQN, 40 de A2C/A3C y 45 escenarios de referencia.
+Cada variante cambia un factor, con cinco semillas y evaluación en 400 series sintéticas nuevas desde 600 000;
+el S&P 500 conserva su partición temporal. Las representaciones ampliadas son la mejora más consistente en esta
+pasada; no se sustituyen los resultados oficiales de 01–02 ni se combinan cambios después de observarlos.
+
+- [Notebook ejecutado](notebooks/03_extras.ipynb).
+- [Diseño y reproducción](results/03_METODOLOGIA.md).
+- [Resultados y conclusiones](results/03_CONCLUSIONES.md).
+- Resultados por semilla y serie en `results/03_grid_*.csv`, resúmenes en `03_extras_*.csv` y figuras en `results/figures/03_*.png`.
+
 ## Documentación
 
 - [`docs/DECISIONES.md`](docs/DECISIONES.md): decisiones del proyecto, cerradas y abiertas.
@@ -147,6 +159,6 @@ ruido (D-2.5); la más prometedora es quedarse con el mejor punto en validación
 - [x] 01 DQN
 - [x] Email al profesor (orden de presentación y dónde se entrega)
 - [x] 02 A3C
-- [ ] 03 Extras
+- [x] 03 Extras
 - [ ] 04 Comparativa
 - [ ] Informe PDF (`results/informe.pdf`, se regenera con `python results/build_informe.py`)

@@ -1,0 +1,5 @@
+mercado,variante,referencia,ventaja_log,semillas_mejoran,n_semillas,min_ventaja,max_ventaja,margen,supera_margen
+tendencia_ciclo,a2c,a3c,0.08507800042700508,3,5,-1.8998821914571802,6.25527967821542,0.22314355131420976,False
+browniano,a2c,a3c,-0.04725185306582036,1,5,-0.067396440161554,0.025013894885004648,0.1,False
+reversion_media,a2c,a3c,0.0,2,5,-0.16468667406336474,0.12316830387640507,0.02,False
+regimenes,a2c,a3c,0.0,1,5,0.0,0.175664671226891,0.1,False

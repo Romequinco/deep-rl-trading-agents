@@ -195,3 +195,54 @@ Formato ligero tipo ADR, como en el Taller 1. ID `D-X.n`: `X` es el bloque (0 ge
 - **Mejor punto (informativo, D-2.4):** en las 400 series nuevas, x480,3 y +30,1 % frente a x388,2 y +15,8 % de la base,
   por encima del margen en los mercados 1 y 3. No se adopta: se midió después del test y el resultado oficial no cambia.
 - **Estado:** CERRADA
+
+### D-3.1 · Extras con un factor y evaluación posterior al test
+
+- **Fecha:** 2026-11-04
+- **Decisión:** completar `03_extras` con el plan previo de `results/03_METODOLOGIA.md`
+  y `results/03_plan.json`: variantes DQN, estado ampliado, placebo, comisión,
+  mezcla, generadores extra, S&P 500 y A2C frente a A3C. Cinco semillas y 500
+  episodios; cada configuración DQN difiere en una sola clave de la referencia.
+- **Aislamiento:** Double DQN se prueba sin las acciones canónicas de D-2.5.
+  Los extras usan subclases en `common/extras.py`; el entorno, los generadores
+  y los agentes originales permanecen intactos. Un test verifica que la base
+  reproduce exactamente los pesos del entrenamiento DQN original.
+- **Protocolo:** los cuatro resultados oficiales no se eligen de nuevo.
+  Se reservan 400 series por mercado desde 600.000, distintas de 100.000 y
+  400.000. Parejas con las mismas series y semillas, mediana y dispersión entre
+  cinco entrenamientos, sin adoptar ni combinar variantes después de verlas.
+- **Real:** train 2017–2021, validación 2022–2023, evaluación 2024–2025,
+  normalización y ventanas solo de train. La trayectoria histórica es única y
+  ya estaba disponible en el Taller 1; el resultado es retrospectivo.
+- **Cómputo:** inferencias de evaluación agrupadas por serie, verificadas frente
+  al entorno paso a paso. Se conserva el aprendizaje secuencial de DQN.
+  Los tiempos con varios entrenamientos simultáneos no permiten comparar
+  velocidad de variantes. A2C/A3C se miden uno a uno en el mismo equipo.
+- **Estado:** CERRADA
+
+### D-3.2 · Resultado de los extras: representación antes que arquitectura
+
+- **Fecha:** 2026-11-04
+- **Ejecución:** 260 entrenamientos DQN y 40 de A2C/A3C, cinco semillas por
+  condición; 400 series nuevas por mercado sintético y una trayectoria temporal
+  del S&P 500. Notebook 03 ejecutado sin errores; CSV por semilla y por serie,
+  cinco figuras y conclusiones en `results/03_CONCLUSIONES.md`.
+- **Resultado:** la ventana supera el margen emparejado en tendencia y reversión
+  (5/5 y 4/5 semillas mejoran). MA30 y volatilidad lo superan en reversión y
+  regímenes (5/5 en ambos), pero empeoran tendencia. Double DQN solo supera el
+  margen en reversión (3/5). Duelo, quitar target, clipping, log y mezcla no lo
+  superan. A2C tampoco lo supera frente a A3C con los parámetros de referencia.
+- **Control:** el placebo sin tendencia pierde la estrategia de los mercados con
+  señal. Con costes altos, el agente casi deja de operar en browniano y regímenes.
+  En el histórico real, +12,1 % de mediana frente a +43,8 % de buy & hold: no se
+  presenta una estrategia superior por usar datos reales.
+- **Decisión:** no se cambia la referencia oficial, no se combinan mejoras ni se
+  reajusta con estas series. Los márgenes son descriptivos, no significación
+  estadística. A2C utiliza un proceso y A3C tres: los segundos comparan estas
+  implementaciones, no idéntico uso de CPU. La trayectoria real es única.
+- **Verificación:** suite de 63 pruebas sin fallos ni errores, con una omisión
+  por ausencia del material bruto; controles de equivalencia, causalidad,
+  comisiones, Double DQN, A2C y evaluación en lote. Auditoría del notebook:
+  presupuestos, cinco semillas, parejas de configuración y 116.010 retornos
+  exportados por serie, sin contar los baselines.
+- **Estado:** CERRADA
