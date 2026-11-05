@@ -161,4 +161,4 @@ pasada; no se sustituyen los resultados oficiales de 01–02 ni se combinan camb
 - [x] 02 A3C
 - [x] 03 Extras
 - [x] 04 Comparativa
-- [ ] Informe PDF (`results/informe.pdf`, se regenera con `python results/build_informe.py`)
+- [x] Informe PDF (`results/informe.pdf`, se regenera con `python results/build_informe.py`)

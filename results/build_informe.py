@@ -49,6 +49,11 @@ th:first-child, td:first-child { text-align: left; }
 .side2 p:not(.cap) { margin: 0; }
 .side .cap { margin-bottom: 0.8mm; }
 .pol p { margin: 0 0 0.9mm; font-size: 8.6pt; line-height: 1.22; }
+.side.w62 { grid-template-columns: 62fr 38fr; }
+.side.w55 { grid-template-columns: 55fr 45fr; }
+.side.w50 { grid-template-columns: 1fr 1fr; }
+.side.top { align-items: start; }
+.banner { margin: 0 0 1mm; }
 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
 .pagebreak { break-after: page; }
 """
