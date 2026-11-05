@@ -23,14 +23,15 @@ CHROME_CANDIDATES = [
 ]
 
 CSS = """
-@page { size: A4; margin: 7mm 9.5mm 6.5mm; }
+@page { size: A4; margin: 5.5mm 9.5mm 5mm; }
 * { box-sizing: border-box; }
-body { font-family: Cambria, Georgia, "Times New Roman", serif; font-size: 8.7pt; line-height: 1.22; color: #111; margin: 0; orphans: 2; widows: 2; }
+body { font-family: Cambria, Georgia, "Times New Roman", serif; font-size: 8.5pt; line-height: 1.17; color: #111; margin: 0; orphans: 2; widows: 2; }
 h1 { font-size: 14.5pt; font-weight: bold; margin: 0 0 0.6mm; text-align: center; }
 h2 { break-after: avoid; font-size: 10pt; font-weight: bold; margin: 1.8mm 0 0.7mm; }
 p, li { text-align: justify; hyphens: auto; }
 p { margin: 0 0 1mm; text-indent: 0; }
-ul { margin: 0 0 1mm; padding-left: 4mm; }
+ul, ol { margin: 0 0 1mm; padding-left: 4mm; }
+ol { padding-left: 5mm; }
 img { width: 100%; display: block; break-inside: avoid; margin: 0 0 0.4mm; }
 table { border-collapse: collapse; width: 100%; font-size: 8.2pt; margin: 0 0 1.4mm; border-top: 0.9pt solid #000; border-bottom: 0.9pt solid #000; }
 thead th { border-bottom: 0.5pt solid #000; font-weight: normal; }
@@ -54,6 +55,15 @@ th:first-child, td:first-child { text-align: left; }
 .side.w50 { grid-template-columns: 1fr 1fr; }
 .side.top { align-items: start; }
 .banner { margin: 0 0 1mm; }
+.side.s1, .side.s2, .side.s3, .side.s4, .side.s5, .side.s6, .side.s7 { align-items: start; margin: 0.6mm 0 1.2mm; }
+.s1 { grid-template-columns: 56fr 44fr; } .s2 { grid-template-columns: 56fr 44fr; } .s3 { grid-template-columns: 48fr 52fr; }
+.s4 { grid-template-columns: 56fr 44fr; } .s5 { grid-template-columns: 50fr 50fr; } .s6 { grid-template-columns: 50fr 50fr; }
+.s7 { grid-template-columns: 42fr 58fr; }
+.s6 img.small { width: 80%; margin: 0 auto; }
+.side ul { margin-bottom: 0; }
+.side p:last-child { margin-bottom: 0; }
+.repo { text-align: center; font-size: 8.4pt; margin: 1.5mm 0 0; }
+.repo a { color: #1a4fb5; }
 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
 .pagebreak { break-after: page; }
 """
