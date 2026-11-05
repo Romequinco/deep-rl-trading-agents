@@ -98,7 +98,9 @@ Formato ligero tipo ADR, como en el Taller 1. ID `D-X.n`: `X` es el bloque (0 ge
 - **Confirmación con el DQN definitivo (`01_dqn`, §3; 3 semillas, 500 episodios, validación):** en reversión a la media, sin
   nada +2,3 % con 3,3 operaciones, solo recompensa +28,8 %, solo observación +29,3 % (con una semilla en +1,8 %) y las dos
   +31,4 %. En el mercado 1, x370, x529, x597 y x505. Normalizar es necesario, pero "las dos" no se distingue de cada una por
-  separado salvo por no tener semillas malas. Pendiente de probar en A3C (`02_a3c`).
+  separado salvo por no tener semillas malas.
+- **Confirmación en A3C (`02_a3c`, `results/02_grid_normalizacion.csv`):** sin normalizar la observación, A3C no opera en
+  reversión (0 %); con las dos, +21,0 %. Solo con la recompensa escalada, el mercado 1 cae a x43,6. Se normalizan las dos.
 - **Estado:** CERRADA
 
 ### D-1.2 · Fin del episodio
@@ -245,4 +247,27 @@ Formato ligero tipo ADR, como en el Taller 1. ID `D-X.n`: `X` es el bloque (0 ge
   comisiones, Double DQN, A2C y evaluación en lote. Auditoría del notebook:
   presupuestos, cinco semillas, parejas de configuración y 116.010 retornos
   exportados por serie, sin contar los baselines.
+- **Estado:** CERRADA
+
+### D-4.1 · Comparativa final en el notebook 04
+
+- **Fecha:** 2026-11-05
+- **Decisión:** `04_comparativa` no entrena: lee `results/` y reúne en un solo notebook las referencias, DQN, A3C, los extras,
+  la tabla final de rendimiento y convergencia y el análisis crítico. Los extras del 03 se muestran aparte y no entran en la
+  tabla oficial (D-2.4, D-3.2).
+- **Tiempos:** los segundos de `01_dqn.csv` se midieron en otro equipo; la tabla usa los de DQN medidos en el mismo equipo
+  que A3C (`02_grid_tiempo_dqn.csv`). Los tiempos de los tabulares del Taller 1 son solo orientativos.
+- **Límite:** las ventajas emparejadas de las mejoras de DQN (§1.5) se copian de la salida de `01_dqn` §7, porque los retornos
+  por serie solo están en la caché, que no se versiona.
+- **Estado:** CERRADA
+
+### D-4.2 · Maquetación del informe
+
+- **Fecha:** 2026-11-05
+- **Decisión:** informe de 2 páginas a dos columnas (figura y texto lado a lado, con la misma altura), en el orden diseño
+  experimental → resultados por mercado → DQN frente a A3C → más allá de los mínimos → análisis crítico, y enlace al
+  repositorio al final. Sin códigos de decisión en el texto: se explica lo decidido.
+- **Figuras:** se eligieron de un catálogo de 44 (28 existentes y 16 dibujadas a tamaño de impresión, en
+  `results/figures/informe_cand/`, con su nota en `CATALOGO.md`).
+- **Límite:** las figuras existentes de 00/01/02 se dibujaron para la pantalla y en el PDF quedan con la letra pequeña.
 - **Estado:** CERRADA

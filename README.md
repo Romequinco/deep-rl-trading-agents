@@ -45,8 +45,11 @@ Continúa el Taller 1, con Q-Learning y SARSA tabulares:
 │       ├── dqn.py                # DQN y sus opciones de mejora
 │       ├── a3c.py                # A3C con procesos asíncronos
 │       ├── tuning.py             # ajuste por etapas y margen de ruido
+│       ├── extras.py             # variantes de un factor del 03 (subclases; no tocan el código base)
+│       ├── extras_report.py      # tablas y figuras del 03
 │       ├── style.py              # paleta y figuras comunes
-│       └── test_common.py
+│       ├── test_common.py
+│       └── test_extras.py
 ├── docs/
 │   ├── DECISIONES.md             # registro de decisiones D-X.n
 │   ├── teoria/                   # síntesis del material de clase
@@ -56,7 +59,9 @@ Continúa el Taller 1, con Q-Learning y SARSA tabulares:
     ├── taller1_tabular.csv       # referencia: baselines, Q-Learning y SARSA del Taller 1
     ├── data/                     # S&P 500 con procedencia y huella
     ├── figures/  models/         # figuras y pesos finales
-    └── informe.md                # entregable → build_informe.py → PDF de 2 páginas
+    ├── figures/informe_cand/     # figuras a tamaño de impresión para el informe (+ CATALOGO.md y _gen.py)
+    ├── informe.md                # fuente del informe → build_informe.py
+    └── informe.pdf               # entregable: PDF de 2 páginas
 ```
 
 ## Puesta en marcha
@@ -121,6 +126,22 @@ Mediana del retorno en las 200 series de test, con 5 semillas. Hiperparámetros:
 Bate a buy & hold donde hay señal, pero no a las reglas ni a los tabulares. Ninguna de las cuatro mejoras probadas supera el margen de
 ruido (D-2.5); la más prometedora es quedarse con el mejor punto en validación.
 
+## Resultado de A3C (`02_a3c`)
+
+Mediana del retorno en las mismas 200 series de test, con 5 semillas. A3C real con 3 procesos asíncronos; ε se sustituye
+por el coeficiente de entropía β. Base: α = 0,001, γ = 0,9, β = 0,01, `t_max` = 20 y 500 episodios; solo cambian α = 0,003
+en el mercado 1 y β = 0 en el 3 (D-2.6).
+
+| Mercado | A3C | DQN | Mejor referencia |
+|---|---|---|---|
+| 1 · Tendencia + ciclo | x374,9 | x299,8 | Regla de tendencia: x630,4 |
+| 2 · Browniano | −4,5 % | −3,9 % | No operar: 0 % |
+| 3 · Reversión a la media | +13,8 % | +20,5 % | Regla de reversión: +29,2 % |
+| 4 · Regímenes | 0 % | 0 % | No operar: 0 % |
+
+Empata con DQN en rendimiento y tampoco bate a las reglas. Entrena x3,4 más rápido en el mismo equipo (9,9 s frente a 33,0 s),
+pero necesita más episodios para converger (84 y 312 frente a 25 y 125) y converge en menos semillas (4/5 y 3/5).
+
 ## Experimentos adicionales (`03_extras`)
 
 El notebook 03 está ejecutado: 260 entrenamientos DQN, 40 de A2C/A3C y 45 escenarios de referencia.
@@ -132,6 +153,15 @@ pasada; no se sustituyen los resultados oficiales de 01–02 ni se combinan camb
 - [Diseño y reproducción](results/03_METODOLOGIA.md).
 - [Resultados y conclusiones](results/03_CONCLUSIONES.md).
 - Resultados por semilla y serie en `results/03_grid_*.csv`, resúmenes en `03_extras_*.csv` y figuras en `results/figures/03_*.png`.
+
+## Comparativa final e informe (`04_comparativa`)
+
+- [`04_comparativa.ipynb`](notebooks/04_comparativa.ipynb) solo lee `results/` y reúne 00–03: referencias, DQN, A3C,
+  extras, la tabla final de rendimiento y convergencia (ejercicio 4) y el análisis crítico. Figuras en `results/figures/04_*.png`.
+- [`results/informe.pdf`](results/informe.pdf): informe de 2 páginas a dos columnas. Se regenera con
+  `python results/build_informe.py --png`, que falla si pasa de 2 páginas y guarda cada página como imagen para revisarla.
+- Conclusión: ningún agente de deep RL gana en ningún mercado (ganan las reglas de un umbral o no operar), DQN ≈ A3C,
+  y lo que más mejora es enriquecer el estado, no cambiar de algoritmo.
 
 ## Documentación
 
