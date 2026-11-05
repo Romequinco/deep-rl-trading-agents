@@ -160,5 +160,5 @@ pasada; no se sustituyen los resultados oficiales de 01–02 ni se combinan camb
 - [x] Email al profesor (orden de presentación y dónde se entrega)
 - [x] 02 A3C
 - [x] 03 Extras
-- [ ] 04 Comparativa
+- [x] 04 Comparativa
 - [ ] Informe PDF (`results/informe.pdf`, se regenera con `python results/build_informe.py`)
