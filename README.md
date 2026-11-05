@@ -13,7 +13,7 @@
 Máster MIAX · Aprendizaje por Refuerzo · Taller 2 · Noviembre 2026<br>
 Óscar Romero Quincoces · Fernando Dapena Tauste · Daniel García López
 
-[**Informe PDF**](results/informe.pdf) · [**Comparativa final**](notebooks/04_comparativa.ipynb) · [Decisiones](docs/DECISIONES.md) · [Taller 1 (tabular)](https://github.com/Romequinco/rl-trading-agents)
+[**Informe PDF**](results/informe.pdf) · [**Presentación**](results/presentacion/presentacion.pdf) · [**Comparativa final**](notebooks/04_comparativa.ipynb) · [Decisiones](docs/DECISIONES.md) · [Taller 1 (tabular)](https://github.com/Romequinco/rl-trading-agents)
 
 </div>
 
@@ -122,6 +122,9 @@ pasada; no se sustituyen los resultados oficiales de 01–02 ni se combinan camb
   extras, la tabla final de rendimiento y convergencia (ejercicio 4) y el análisis crítico. Figuras en `results/figures/04_*.png`.
 - [`results/informe.pdf`](results/informe.pdf): informe de 2 páginas a dos columnas. Se regenera con
   `python results/build_informe.py --png`, que falla si pasa de 2 páginas y guarda cada página como imagen para revisarla.
+- [`results/presentacion/presentacion.pdf`](results/presentacion/presentacion.pdf): presentación 16:9 con 6 diapositivas y
+  anexos A–F. Cada diapositiva es un HTML en `results/presentacion/slides/`; se regenera con `python results/build_presentacion.py --png`.
+  Figuras propias en `results/figures/presentacion_cand/`.
 - Conclusión: ningún agente de deep RL gana en ningún mercado (ganan las reglas de un umbral o no operar), DQN ≈ A3C,
   y lo que más mejora es enriquecer el estado, no cambiar de algoritmo.
 
@@ -180,7 +183,8 @@ pasada; no se sustituyen los resultados oficiales de 01–02 ni se combinan camb
     ├── figures/  models/         # figuras y pesos finales
     ├── figures/informe_cand/     # figuras a tamaño de impresión para el informe (+ CATALOGO.md y _gen.py)
     ├── informe.md                # fuente del informe → build_informe.py
-    └── informe.pdf               # entregable: PDF de 2 páginas
+    ├── informe.pdf               # entregable: PDF de 2 páginas
+    └── presentacion/             # presentación: slides/*.html → build_presentacion.py → presentacion.pdf
 ```
 
 ## Puesta en marcha
@@ -263,3 +267,4 @@ Pruebas: `.\.venv\Scripts\python.exe -m unittest discover -s notebooks/common -t
 - [x] 03 Extras
 - [x] 04 Comparativa
 - [x] Informe PDF (`results/informe.pdf`, se regenera con `python results/build_informe.py`)
+- [x] Presentación (`results/presentacion/presentacion.pdf`, se regenera con `python results/build_presentacion.py`)

@@ -1,0 +1,16 @@
+<section class="slide annex">
+  <div class="kicker">Anexo A · Ajuste de hiperparámetros</div>
+  <h1>Solo γ y la normalización importan más que el ruido entre semillas</h1>
+  <div class="body">
+    <div class="col" style="flex:2.3"><img class="fig" src="../figures/informe_cand/cand_hiperparametros_a.png"></div>
+    <div class="col small">
+      <ul>
+        <li>Un parámetro cada vez, en 100 series de validación con 3 semillas.</li>
+        <li>Un valor solo se adopta si mejora más que ~2 errores estándar: 25&nbsp;% del múltiplo en 1, 2 puntos en 3 y 10 en 2 y 4.</li>
+        <li><b>DQN:</b> ningún cambio lo supera; γ = 0,99 cae a x212.</li>
+        <li><b>A3C:</b> α = 0,003 en 1 (x538 → x728) y β = 0 en 3 (+21,0 → +25,9&nbsp;%); γ = 0,99 hunde el 1 a x43.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="cap">Mediana en validación de cada valor probado; color = diferencia con el elegido en márgenes de ruido; recuadro = elegido.</p>
+</section>

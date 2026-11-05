@@ -1,0 +1,17 @@
+<section class="slide annex">
+  <div class="kicker">Anexo E · Extras completos</div>
+  <h1>Solo cambiar el estado supera el margen de forma consistente</h1>
+  <div class="body">
+    <div class="col" style="flex:1.35"><img class="fig" src="../figures/04_p3_ventaja_emparejada.png"></div>
+    <div class="col small">
+      <ul>
+        <li>Cada variante cambia <b>una sola cosa</b> respecto al DQN base; 5 semillas y 400 series nuevas por mercado.</li>
+        <li>Ventaja = mediana de log(1 + r<sub>variante</sub>) − log(1 + r<sub>base</sub>) serie a serie; recuadro si supera el margen.</li>
+        <li><b>Estado:</b> +20 retornos y MA30 + volatilidad son lo único consistente.</li>
+        <li><b>Arquitectura y recompensa:</b> Double DQN solo en reversión; el resto, nada.</li>
+        <li><b>Comisión 0&nbsp;%</b> «mejora» porque cambia la tarea, no el algoritmo.</li>
+        <li>Placebo y mezcla de mercados empeoran, como se esperaba.</li>
+      </ul>
+    </div>
+  </div>
+</section>

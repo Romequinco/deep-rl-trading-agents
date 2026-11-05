@@ -1,0 +1,22 @@
+<section class="slide annex">
+  <div class="kicker">Anexo A · Normalización de la entrada y la recompensa</div>
+  <h1>Sin normalizar, la red apenas distingue la tendencia y deja de operar en reversión</h1>
+  <img class="fig" src="../figures/00_escala_entradas.png" style="width:228mm; margin:0 auto">
+  <div class="body" style="margin-top:2mm">
+    <div class="col small" style="justify-content:flex-start">
+      <ul>
+        <li>La tendencia tiene σ = 0,153 en el mercado 1 y 0,024 en el resto, frente a una posición de 0 o 1; la recompensa es del orden de 10⁻³.</li>
+        <li>Ambas se dividen por su σ calculada <b>solo con series de train</b>; las métricas se miden con el balance real.</li>
+      </ul>
+    </div>
+    <div class="col small" style="justify-content:flex-start">
+      <table style="font-size:10.5pt">
+        <thead><tr><th>Reversión (validación)</th><th>DQN</th><th>A3C</th></tr></thead>
+        <tbody>
+          <tr><td>Sin normalizar</td><td>+2,3&nbsp;%</td><td>0&nbsp;% (no opera)</td></tr>
+          <tr><td>Observación y recompensa</td><td><b>+31,4&nbsp;%</b></td><td><b>+21,0&nbsp;%</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

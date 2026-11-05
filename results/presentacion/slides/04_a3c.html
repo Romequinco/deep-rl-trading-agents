@@ -1,0 +1,21 @@
+<section class="slide">
+  <div class="kicker">A3C frente a DQN · actor-crítico asíncrono</div>
+  <h1>A3C empata con DQN y entrena 3,4 veces más rápido, pero converge peor</h1>
+  <div class="body">
+    <div class="col" style="flex:1.15"><img class="fig" src="../figures/informe_cand/cand_rendimiento_b.png"><p class="cap">Mediana del retorno en test (200 series; DQN y A3C, mediana de 5 semillas). Recuadro = mejor del mercado.</p></div>
+    <div class="col small">
+      <p style="margin-bottom:2mm">A3C no usa ε: explora porque su política es estocástica, así que se ajusta la <b>entropía β</b>. Solo cambian α = 0,003 en el 1 y β = 0 en el 3.</p>
+      <table style="font-size:10.5pt">
+        <thead><tr><th>Mercado 1 · 3</th><th>DQN</th><th>A3C</th></tr></thead>
+        <tbody>
+          <tr><td>Test</td><td>x299,8 · <b>+20,5&nbsp;%</b></td><td><b>x374,9</b> · +13,8&nbsp;%</td></tr>
+          <tr><td>Convergen</td><td><b>5/5 · 5/5</b></td><td>4/5 · 3/5</td></tr>
+          <tr><td>Episodios</td><td><b>25 · 125</b></td><td>84 · 312</td></tr>
+          <tr><td>Curva</td><td><img src="../figures/presentacion_cand/spark_dqn_m1.png" style="height:7mm; vertical-align:middle"> <img src="../figures/presentacion_cand/spark_dqn_m3.png" style="height:7mm; vertical-align:middle"></td><td><img src="../figures/presentacion_cand/spark_a3c_m1.png" style="height:7mm; vertical-align:middle"> <img src="../figures/presentacion_cand/spark_a3c_m3.png" style="height:7mm; vertical-align:middle"></td></tr>
+          <tr><td>Entreno total</td><td>33,0 s</td><td><b>9,9 s</b></td></tr>
+        </tbody>
+      </table>
+      <div class="verdict" style="font-size:11.5pt">Empate en rendimiento. A3C es más rápido por episodio; DQN converge antes y en todas las semillas: hasta converger tardan lo mismo.</div>
+    </div>
+  </div>
+</section>

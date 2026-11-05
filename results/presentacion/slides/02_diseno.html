@@ -1,0 +1,16 @@
+<section class="slide">
+  <style>.bx10 .box { font-size: 10pt; line-height: 1.2; }</style>
+  <div class="kicker">Problema, diseño y protocolo</div>
+  <h1>Solo hay señal en dos mercados, y una regla de un umbral ya la aprovecha</h1>
+  <p class="lead" style="margin-bottom:1mm">Retorno del paso siguiente por decil de tendencia: a favor en el 1, en contra en el 3; en el 2 y el 4 no cubre la comisión.</p>
+  <img class="fig" src="../figures/00_senal_por_decil.png" style="width:228mm; margin:0 auto">
+  <div class="bx10" style="min-height:0; display:flex; align-items:stretch; gap:2mm; margin-top:2mm">
+    <div class="box"  style="flex:1"><div class="kicker">Entorno</div>Estado (tendencia, posición) · vender / mantener / comprar · comisión 0,1&nbsp;%</div>
+    <div style="align-self:center; color:#2B6CB0; font-size:16pt">→</div>
+    <div class="box"  style="flex:1.1"><div class="kicker">Red</div>[tendencia/σ, posición] → 64 ReLU · entrada y recompensa normalizadas con train</div>
+    <div style="align-self:center; color:#2B6CB0; font-size:16pt">→</div>
+    <div class="box"  style="flex:1.1"><div class="kicker">Algoritmos</div>DQN (memoria y red objetivo) y A3C (3 procesos asíncronos)</div>
+    <div style="align-self:center; color:#2B6CB0; font-size:16pt">→</div>
+    <div class="box"  style="flex:1.25; border-top-color:#2F9E6E"><div class="kicker" style="color:#2F9E6E">Protocolo</div>Serie nueva por episodio · 100 de validación · test en 200, una sola vez · 5 semillas · margen de ruido</div>
+  </div>
+</section>

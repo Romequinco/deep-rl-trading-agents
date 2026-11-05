@@ -1,0 +1,19 @@
+<section class="slide annex">
+  <div class="kicker">Anexo D · Un episodio de test</div>
+  <h1>Las dos redes operan igual donde hay señal y se apartan donde no la hay</h1>
+  <div style="display:flex; gap:4mm; margin-top:1mm">
+    <div style="flex:1; min-width:0"><div class="kicker" style="margin:0">DQN</div><img class="fig" src="../figures/presentacion_cand/pres_episodios_dqn.png"></div>
+    <div style="flex:1; min-width:0"><div class="kicker" style="margin:0; color:#c0392b">A3C</div><img class="fig" src="../figures/presentacion_cand/pres_episodios_a3c.png"></div>
+  </div>
+  <p class="cap">Semilla mediana y, en cada mercado, la serie de test con el retorno mediano de DQN (la misma para A3C). Arriba, precio con la posición (verde dentro, rojo fuera); abajo, balance frente a buy &amp; hold.</p>
+  <div class="body small" style="margin-top:2mm">
+    <div class="col" style="justify-content:flex-start"><ul>
+      <li><b>1 · Tendencia:</b> los dos entran con la subida y salen al girar el ciclo.</li>
+      <li><b>3 · Reversión:</b> compran en las caídas y venden en los rebotes.</li>
+    </ul></div>
+    <div class="col" style="justify-content:flex-start"><ul>
+      <li><b>2 · Browniano:</b> se quedan dentro y siguen a buy &amp; hold.</li>
+      <li><b>4 · Regímenes:</b> ninguno opera; el balance se queda en el capital inicial mientras buy &amp; hold pierde.</li>
+    </ul></div>
+  </div>
+</section>

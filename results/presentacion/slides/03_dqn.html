@@ -1,0 +1,22 @@
+<section class="slide">
+  <div class="kicker">DQN · off-policy con memoria de experiencias</div>
+  <h1>DQN aprende la estrategia esperada donde hay señal, sin llegar a la regla</h1>
+  <div class="kpis">
+    <div class="kpi"><div class="mk m1">1 · Tendencia + ciclo</div><div class="v">x299,8</div><div class="s">regla x630,4 · buy &amp; hold x33,6</div></div>
+    <div class="kpi"><div class="mk m2">2 · Browniano</div><div class="v">−3,9&nbsp;%</div><div class="s">no operar 0&nbsp;% · buy &amp; hold −3,5&nbsp;%</div></div>
+    <div class="kpi"><div class="mk m3">3 · Reversión</div><div class="v">+20,5&nbsp;%</div><div class="s">regla +29,2&nbsp;% · buy &amp; hold −0,3&nbsp;%</div></div>
+    <div class="kpi"><div class="mk m4">4 · Regímenes</div><div class="v">0&nbsp;%</div><div class="s">no operar 0&nbsp;% · buy &amp; hold −12,5&nbsp;%</div></div>
+  </div>
+  <div class="body">
+    <div class="col wide"><img class="fig" src="../figures/presentacion_cand/pres_episodios_dqn.png"><p class="cap">Un episodio típico de test (semilla mediana y serie con el retorno mediano de las 200): posición (arriba) y balance frente a buy &amp; hold (abajo).</p></div>
+    <div class="col narrow small">
+      <ul>
+        <li><b>1:</b> sigue la tendencia, pero opera de más (53 operaciones).</li>
+        <li><b>3:</b> compra tras caídas y vende tras subidas.</li>
+        <li><b>2:</b> entra y se queda, como buy &amp; hold.</li>
+        <li><b>4:</b> no opera: lo correcto.</li>
+      </ul>
+      <p class="note">α = 10⁻³ · γ = 0,9 · ε ×0,995 por episodio · 500 episodios. Ningún cambio supera el margen de ruido.</p>
+    </div>
+  </div>
+</section>

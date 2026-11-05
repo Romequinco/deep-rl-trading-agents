@@ -1,0 +1,20 @@
+<section class="slide annex">
+  <div class="kicker">Anexo B · Políticas aprendidas</div>
+  <h1>DQN y A3C llegan a casi la misma tabla de decisiones</h1>
+  <img class="fig" src="../figures/informe_cand/cand_politica_a.png" style="width:228mm; margin:0 auto">
+  <div class="body" style="margin-top:2mm">
+    <div class="col small" style="justify-content:flex-start">
+      <ul>
+        <li><b>1 · Tendencia:</b> compran con tendencia positiva y venden al girar a negativa.</li>
+        <li><b>3 · Reversión:</b> compran tras caídas fuertes y venden tras subidas fuertes.</li>
+      </ul>
+    </div>
+    <div class="col small" style="justify-content:flex-start">
+      <ul>
+        <li><b>2 · Browniano:</b> sin patrón claro; una vez dentro casi nunca venden.</li>
+        <li><b>4 · Regímenes:</b> A3C no compra nunca; DQN compra poco y vende ante movimientos grandes.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="cap">Acción greedy de cada una de las 5 semillas en 11 niveles de tendencia entre −2,5σ y +2,5σ, sin activo (comprar) y con activo (vender).</p>
+</section>

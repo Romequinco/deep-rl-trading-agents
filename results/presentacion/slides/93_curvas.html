@@ -1,0 +1,19 @@
+<section class="slide annex">
+  <div class="kicker">Anexo C · Curvas de aprendizaje</div>
+  <h1>DQN alcanza su nivel en 25 episodios; A3C tarda más y varía más entre semillas</h1>
+  <div class="body">
+    <div class="col" style="flex:2.4; justify-content:flex-start">
+      <img class="fig" src="../figures/01_dos_curvas.png">
+      <img class="fig" src="../figures/02_dos_curvas.png" style="margin-top:1.5mm">
+    </div>
+    <div class="col small">
+      <p><b>Arriba DQN, abajo A3C.</b> Gris: retorno con exploración; color: política greedy en 20 series de validación. Mediana y rango de 5 semillas.</p>
+      <ul>
+        <li>Con ε, DQN opera al azar casi todo el entrenamiento: la curva gris queda muy por debajo.</li>
+        <li>A3C explora muestreando su política, por eso las curvas están más cerca.</li>
+        <li>En el 4 ambas greedy quedan en 0: aprenden pronto a no operar.</li>
+      </ul>
+      <p class="note">Convergencia: primer punto que recorre el 90&nbsp;% del camino hasta el nivel final.</p>
+    </div>
+  </div>
+</section>

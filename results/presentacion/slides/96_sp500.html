@@ -1,0 +1,25 @@
+<section class="slide annex">
+  <div class="kicker">Anexo F · S&amp;P 500 real</div>
+  <h1>En el S&amp;P 500 ninguna variante bate a buy &amp; hold</h1>
+  <img class="fig" src="../figures/03_sp500.png" style="width:165mm; margin:0 auto">
+  <div class="body" style="margin-top:2mm">
+    <div class="col small" style="justify-content:flex-start">
+      <table style="font-size:10.5pt">
+        <thead><tr><th>Test 2024–2025</th><th>Retorno</th><th>Caída máx.</th><th>Operaciones</th></tr></thead>
+        <tbody>
+          <tr><td>Buy &amp; hold</td><td><b>+43,8&nbsp;%</b></td><td>18,9&nbsp;%</td><td>1</td></tr>
+          <tr><td>DQN (train browniano)</td><td>+34,8&nbsp;%</td><td>5,5&nbsp;%</td><td>1</td></tr>
+          <tr><td>DQN (train S&amp;P 500)</td><td>+12,1&nbsp;%</td><td>16,7&nbsp;%</td><td>75</td></tr>
+          <tr><td>Aleatorio</td><td>+2,1&nbsp;%</td><td>16,1&nbsp;%</td><td>163</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col small" style="justify-content:flex-start">
+      <ul>
+        <li>Train 2017–2021, validación 2022–2023, test 2024–2025; normalización solo con train.</li>
+        <li>Una única trayectoria: 5 semillas son 5 entrenamientos, no 5 históricos.</li>
+        <li>Retrospectivo y sin dividendos, spread ni deslizamiento.</li>
+      </ul>
+    </div>
+  </div>
+</section>

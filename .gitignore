@@ -242,3 +242,8 @@ results/informe.html
 results/informe_p*.png
 
 .DS_Store
+
+# Intermedios de la presentación (se regeneran con results/build_presentacion.py)
+results/presentacion/presentacion.html
+results/presentacion/preview_*
+results/presentacion/png/
